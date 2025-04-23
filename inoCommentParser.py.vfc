@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : inoCommentParser.py.vfc
-;  File Date : 10:04:15 PM - 22:Apr:2025
+;  File Date : 10:52:47 AM - 23:Apr:2025
 
 set();// !/usr/bin/env python3
 set(""");//
@@ -328,6 +328,7 @@ set("finally",);//  for try
 set(]);// 
 path(ends = [);///// ////
 set("return",);// 
+set("continue",);// 
 set(]);// 
 path(events = [);///// ////
 set("#include",);// 
@@ -341,7 +342,7 @@ end();//
 
 input(def is_path(line: str) -> bool:);// beginfunc
 set(""");//
-set(Return True if the first word of the given line is one of the path type.);// 
+set( );//Return True if the first word of the given line is one of the path type.
 set(""");//
 set(parts = line.strip().split(None, 1));// 
 branch(if not parts:);// beginif
@@ -399,17 +400,23 @@ set(marker = parts[0]);//
 set(return marker);// 
 end();// endfunc
 
+input(def first_token(code):);// ////
+generic();// // Split using regex to match '.', ';', and '(' as delimiters//
+generic(tokens = re.split(r'[.;(]+', code.strip()));// ////
+set();//// // Return the first token or "none" if the string is empty////
+end(return tokens[0] if tokens else "none");//// //////
+
 input(def get_VFC_type(code : str, line: str) -> Optional[str]:);// beginfunc
 set(""");//
 set(If the first word of `line` (without any leading INLINECOMMENT ) is in Begins or Ends,);// 
 set(returns its mapped type; otherwise returns None.);// 
 set(""");//
 set(token = code.strip().split(None, 1)[0] if len(code) > 1 else "none");// 
-branch(if token in outputs:);//
+branch(if first_token(code) in outputs:);//
 path();//
 set(return "output");// 
 bend();// endif
-branch(if token in ends:);//
+branch(if first_token(code) in ends:);//
 path();//
 set(return "end");// 
 bend();// endif
@@ -433,9 +440,6 @@ set(return begin_type[marker]);//
 bend();// endif
 branch(if marker in Ends:);// beginif
 path();//
-output();//print( '------------------------------------------------')
-set();//print(type(end_type))
-output();//print( marker , end_type )
 set(return end_type[marker]);// 
 bend();// endif
 set(return "set");// 
@@ -475,6 +479,73 @@ lend();// endfor
 set(return VFC);// 
 end();// endfunc
 
+input(def  footer( exportname  ):);//
+set();//
+set(ENVTOK = 'INSECTA');//
+generic(foot = f';{ENVTOK} EMBEDDED SESSION INFORMATION\n');//  
+generic(foot+='; 255 16777215 65280 16777088 16711680 32896 8421504 0 255 255 16777215 4227327 2960640\n');//  
+generic(foot+= f';    { os.path.basename(exportname) } // \n');// 
+generic(foot+='; notepad.exe\n');//  
+generic(foot+=f';{ENVTOK} EMBEDDED ALTSESSION INFORMATION\n');//  
+generic(foot+='; 880 168 766 1516 0 110   392   31    ino.key  0\n');//  
+end(return foot);//
+
+input(def __fix_VFC_paths( input_string ):);// beginfunc
+set(strings = input_string.split("\n"));//  Splits the input at each newline
+set(VFC = '');// 
+generic(skip_next = 0);// // Tracks how many items to skip//
+loop(for i  in range( len(strings) ) :);// beginfor
+set(code = strings[i]);//
+branch(if code.startswith( "branch")  :);//
+path();//
+set(code2 = strings[i+1].strip());//
+set(code3 = strings[i+2].strip());//
+output();//input( f"---> {code3} , {code2} , {code}" )
+branch(if code2.startswith("path()")   and   code3.startswith("set({)"):);//
+path();//
+set(VFC +=code + "\n");// 
+set(VFC += "path({)" + VFCSEPERATOR  + '\n');// 
+generic(skip_next = 3);//skip_next = 2
+bend();// endif
+bend();// endif
+branch(if skip_next > 0:);// ////
+path();//
+set(skip_next -= 1);//// //////
+end(continue);// // Skip the iteration//
+bend();//
+set(VFC +=code + "\n");// 
+lend();// endfor
+set(return VFC);// 
+end();// endfunc
+
+input(def fix_VFC_paths( input_string ):);// beginfunc
+set(strings = input_string.split("\n"));//  Splits the input at each newline
+set(VFC = '');// 
+generic(skip_next = 0);// // Tracks how many items to skip//
+loop(for i  in range( len(strings) ) :);// beginfor
+set(code = strings[i]);//
+branch(if code.startswith( "branch")  :);//
+path();//
+set(code2 = strings[i+1].strip());//
+set(code3 = strings[i+2].strip());//
+output();//input( f"---> {code3} , {code2} , {code}" )
+branch(if code2.startswith("path()")   and   code3.startswith("set({)"):);//
+path();//
+set(VFC +=code + "\n");// 
+set(VFC += "path({)" + VFCSEPERATOR  + '\n');// 
+generic(skip_next = 3);//skip_next = 2
+bend();// endif
+bend();// endif
+branch(if skip_next > 0:);// ////
+path();//
+set(skip_next -= 1);//// //////
+end(continue);// // Skip the iteration//
+bend();//
+set(VFC +=code + "\n");// 
+lend();// endfor
+set(return VFC);// 
+end();// endfunc
+
 input(def main():);// beginfunc
 set(global modified_code);//
 set(p = argparse.ArgumentParser());// 
@@ -484,10 +555,12 @@ set(p.add_argument('--skip-format', action='store_true'));//
 set(args = p.parse_args());// 
 set(modified_code  = process_file(args.input_file, args.output, args.skip_format));// 
 set(VFC = generate_VFC(modified_code));// 
+process(VFC = fix_VFC_paths( VFC ));//
 output(print( modified_code ));//print( VFC )
 branch(with open(args.input_file+'.vfc', 'w') as VFC_output:);// beginwith
 path();//
 set(VFC_output.write(VFC));// 
+set(VFC_output.write( footer( args.input_file ) ));// 
 bend();// endwith
 end();// endfunc
 branch(if __name__ == '__main__':);// beginif
@@ -502,4 +575,4 @@ bend();// endif
 ;    inoCommentParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 942 75 1469 1878 0 138   721   4294951715    python.key  0
+; 1424 273 1171 1516 467 128   567   4294952735    python.key  0

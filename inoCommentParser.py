@@ -326,6 +326,7 @@ paths = [
 	]
 ends = [
 	"return",
+	"continue",
 	]
 events = [
 	"#include",
@@ -338,7 +339,7 @@ outputs = [
 
 def is_path(line: str) -> bool:
 	"""
-	Return True if the first word of the given line is one of the path type.
+	
 	"""
 	parts = line.strip().split(None, 1)
 	if not parts:
@@ -391,17 +392,22 @@ def get_marker( comment ):
 	marker = parts[0]
 	return marker
 	
+def first_token(code):
+	
+	tokens = re.split(r'[.;(]+', code.strip())
+	
+	return tokens[0] if tokens else "none"
 def get_VFC_type(code : str, line: str) -> Optional[str]:
 	"""
 	If the first word of `line` (without any leading INLINECOMMENT ) is in Begins or Ends,
 	returns its mapped type; otherwise returns None.
 	"""
 	token = code.strip().split(None, 1)[0] if len(code) > 1 else "none"
-	if token in outputs:
+	if first_token(code) in outputs:
 	
 		return "output"
 		
-	if token in ends:
+	if first_token(code) in ends:
 	
 		return "end"
 		
@@ -425,9 +431,6 @@ def get_VFC_type(code : str, line: str) -> Optional[str]:
 		
 	if marker in Ends:
 	
-		
-		
-		
 		return end_type[marker]
 		
 	return "set"
@@ -466,6 +469,72 @@ def generate_VFC(input_string):
 	
 	return VFC
 	
+def  footer( exportname  ):
+	
+	ENVTOK = 'INSECTA'
+	foot = f';{ENVTOK} EMBEDDED SESSION INFORMATION\n'
+	foot+='; 255 16777215 65280 16777088 16711680 32896 8421504 0 255 255 16777215 4227327 2960640\n'
+	foot+= f';    { os.path.basename(exportname) } // \n'
+	foot+='; notepad.exe\n'
+	foot+=f';{ENVTOK} EMBEDDED ALTSESSION INFORMATION\n'
+	foot+='; 880 168 766 1516 0 110   392   31    ino.key  0\n'
+	return foot
+def __fix_VFC_paths( input_string ):
+	strings = input_string.split("\n")
+	VFC = ''
+	skip_next = 0
+	for i  in range( len(strings) ) :
+		code = strings[i]
+		if code.startswith( "branch")  :
+		
+			code2 = strings[i+1].strip()
+			code3 = strings[i+2].strip()
+			
+			if code2.startswith("path()")   and   code3.startswith("set({)"):
+			
+				VFC +=code + "\n"
+				VFC += "path({)" + VFCSEPERATOR  + '\n'
+				skip_next = 3
+				
+			
+		if skip_next > 0:
+		
+			skip_next -= 1
+			continue
+			
+		VFC +=code + "\n"
+		
+	
+	return VFC
+	
+def fix_VFC_paths( input_string ):
+	strings = input_string.split("\n")
+	VFC = ''
+	skip_next = 0
+	for i  in range( len(strings) ) :
+		code = strings[i]
+		if code.startswith( "branch")  :
+		
+			code2 = strings[i+1].strip()
+			code3 = strings[i+2].strip()
+			
+			if code2.startswith("path()")   and   code3.startswith("set({)"):
+			
+				VFC +=code + "\n"
+				VFC += "path({)" + VFCSEPERATOR  + '\n'
+				skip_next = 3
+				
+			
+		if skip_next > 0:
+		
+			skip_next -= 1
+			continue
+			
+		VFC +=code + "\n"
+		
+	
+	return VFC
+	
 def main():
 	global modified_code
 	p = argparse.ArgumentParser()
@@ -475,15 +544,17 @@ def main():
 	args = p.parse_args()
 	modified_code  = process_file(args.input_file, args.output, args.skip_format)
 	VFC = generate_VFC(modified_code)
+	VFC = fix_VFC_paths( VFC )
 	print( modified_code )
 	with open(args.input_file+'.vfc', 'w') as VFC_output:
 	
 		VFC_output.write(VFC)
+		VFC_output.write( footer( args.input_file ) )
 		
 	
 if __name__ == '__main__':
 
 	main()
 	
-#  Export  Date: 10:04:15 PM - 22:Apr:2025.
+#  Export  Date: 10:52:47 AM - 23:Apr:2025.
 

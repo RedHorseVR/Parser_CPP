@@ -1,0 +1,67 @@
+;  IRL FlowCode Version: Version 10.0
+;  c1995-2015: Visual Flow Coder by 2LResearch
+;
+;  File Name : ascii_table.ino.vfc
+;  File Date : 10:56:33 AM - 23:Apr:2025
+
+set(/*);// 
+set(ASCII table);// 
+set(Prints out byte values in all possible formats:);// 
+set(- as raw binary values);// 
+set(- as ASCII-encoded decimal, hex, octal, and binary values);// 
+set(For more on ASCII, see http:);// 
+set(The circuit: No external hardware needed.);// 
+set(created 2006);// 
+set(by Nicholas Zambetti <http:);// 
+set(modified 9 Apr 2012);// 
+set(by Tom Igoe);// 
+set(This example code is in the public domain.);// 
+set(https:);// 
+set(*/);// 
+
+input(void setup());// beginfunc
+set({);// 
+output(Serial.begin(9600););// 
+loop(while (!Serial));// beginwhile
+set({);// 
+set(;);// 
+lend(});// endwhile
+output(Serial.println("ASCII Table ~ Character Map"););// 
+end(});// endfunc
+set(// first visible ASCIIcharacter '!' is number 33:);//  first visible ASCIIcharacter 0 is number 33:
+set(int thisByte = 33;);// 
+set(// for example, '!' is the same as 33, so you could also use this:);//  for example, 0 is the same as 33, so you could also use this:
+set(// int thisByte = '!';);//  int thisByte = 0;
+
+input(void loop());// beginfunc
+set({);// 
+set(// will show up as '!');//  will show up as 0
+output(Serial.write(thisByte););// 
+output(Serial.print(", dec: "););// 
+output(Serial.print(thisByte););// 
+output(Serial.print(", hex: "););// 
+output(Serial.print(thisByte, HEX););// 
+output(Serial.print(", oct: "););// 
+output(Serial.print(thisByte, OCT););// 
+output(Serial.print(", bin: "););// 
+output(Serial.println(thisByte, BIN););// 
+set(// if printed last visible character '~' or 126, stop:);//  if printed last visible character 0 or 126, stop:
+set(if (thisByte == 126));// 
+set({ // you could also use if (thisByte == '~') {);//  you could also use if (thisByte == 0) {
+loop(while (true));// beginwhile
+set({);// 
+end(continue;);// 
+lend(});// endwhile
+set(});// 
+set(thisByte++;);// 
+end(});// endfunc
+set();//   Export  Date: 10:48:54 AM - 23:Apr:2025;
+
+
+
+;INSECTA EMBEDDED SESSION INFORMATION
+; 255 16777215 65280 16777088 16711680 32896 8421504 0 255 255 16777215 4227327 2960640
+;    ascii_table.ino   //   ;
+; notepad.exe
+;INSECTA EMBEDDED ALTSESSION INFORMATION
+; 880 168 766 1516 0 110   356   17    ino.key  0
