@@ -2,9 +2,8 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : inoCommentParser.py.vfc
-;  File Date : 10:52:47 AM - 23:Apr:2025
+;  File Date : 12:09:11 PM - 23:Apr:2025
 
-set();// !/usr/bin/env python3
 set(""");//
 set(Complete Arduino Structure Comment Parser);// 
 set(A two-phase parser that:);// 
@@ -19,9 +18,11 @@ event(import argparse);//
 event(import tempfile);// 
 event(import re);// 
 event(from typing import List, Tuple, Optional, Set);// 
-set();//  Only include the tags we want to use
-set(STRUCTURE_TAGS = {"if": ("beginif", "endif"), "for": ("beginfor", "endfor"), "while": ("beginwhile", "endwhile"), "function": ("beginfunc", "endfunc")});// 
-set();//  PHASE 1: Code Formatting with clang-format + indent-else post-pass
+set(STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),);// 
+set("for":     ("beginfor",    "endfor"),);// 
+set("while":   ("beginwhile",  "endwhile"),);// 
+set("switch":  ("beginswitch","endswitch"),);// 
+set("function":("beginfunc",   "endfunc")});// 
 set(config = """);// 
 set(Language: Cpp);// 
 set(BasedOnStyle: Google);// 
@@ -99,7 +100,6 @@ set(print(f"Error during formatting: {e}", file=sys.stderr));//
 set(sys.exit(1));// 
 bend();// endtry
 end();// endfunc
-set();//  PHASE 2: Structure Comment Addition
 
 input(def add_structure_comments(code: str) -> str:);// beginfunc
 set(""");//
@@ -111,12 +111,11 @@ set(Code with added structure comments);//
 set(""");//
 set(lines = code.split('\n'));// 
 set(result = lines.copy());// 
-set();//  Function regex: exclude control keywords at start
-set(function_regex = re.compile(r'^\s*(?!(?:if|for|while|else)\b)[\w\s\*\&\:\<\>\~]+\w+\s*\([^;{]*\)\s*$'));// 
+set(#function_regex = re.compile(r'^\s*(?!(?:if|for|while|else)\b)[\w\s\*\&\:\<\>\~]+\w+\s*\([^;{]*\)\s*$'));// function_regex = re.compile(r0)
+set(function_regex = re.compile(r'^\s*(?!(?:if|for|while|else|switch)\b)[\w\s\*\&\:\<\>\~]+\w+\s*\([^;{]*\)\s*$'));// 
 set(blocks: List[Tuple[str, int, Optional[int], Optional[int]]] = []);// 
 set(brace_stack: List[Tuple[int, int, Optional[int]]] = []);// 
 set(tagged_lines: Set[int] = set());// 
-set();//  First pass: identify blocks and track braces
 loop(for i, line in enumerate(lines):);// beginfor
 set(stripped = line.strip());// 
 branch(if not stripped or stripped.startswith('//'):);// beginif
@@ -124,7 +123,6 @@ path();//
 set(continue);// 
 bend();// endif
 set(indent = len(line) - len(line.lstrip()));// 
-set();//  detect control
 branch(if re.match(r'^\s*if\s*\(', stripped):);// beginif
 path();//
 set(blocks.append(('if', i, None, None)));// 
@@ -132,14 +130,15 @@ path(elif re.match(r'^\s*for\s*\(', stripped):);// beginelif
 set(blocks.append(('for', i, None, None)));// 
 path(elif re.match(r'^\s*while\s*\(', stripped):);// beginelif
 set(blocks.append(('while', i, None, None)));// 
-set();//  detect function
+path(elif re.match(r'^\s*switch\s*\(', stripped):);// beginelif
+set(blocks.append(('switch', i, None, None)));// 
 path(elif function_regex.match(stripped):);// beginelif
 set(blocks.append(('function', i, None, None)));// 
 set();// endlif
 set();// endlif
 set();// endlif
+set();// endlif
 bend();// endif
-set();//  opening brace
 branch(if '{' in stripped:);// beginif
 path();//
 branch(if blocks and blocks[-1][1] in (i, i - 1) and blocks[-1][2] is None:);// beginif
@@ -152,7 +151,6 @@ set(bidx = None);//
 bend();// endif
 set(brace_stack.append((i, indent, bidx)));// 
 bend();// endif
-set();//  closing brace
 branch(if '}' in stripped:);// beginif
 path();//
 branch(if brace_stack:);// beginif
@@ -166,7 +164,6 @@ bend();// endif
 bend();// endif
 bend();// endif
 lend();// endfor
-set();//  Extend if-block end_lines to include else/else-if chains
 set(updated = []);// 
 loop(for btype, sline, ob, eline in blocks:);// beginfor
 branch(if btype == 'if' and eline is not None:);// beginif
@@ -182,7 +179,6 @@ set(continue);//
 bend();// endif
 branch(if st.startswith('else'):);// beginif
 path();//
-set();//  find where this else block closes
 set(# locate '{');//  locate 0
 branch(if '{' in st:);// beginif
 path();//
@@ -194,7 +190,6 @@ set(k += 1);//
 lend();// endwhile
 set(open_j = k);// 
 bend();// endif
-set();//  match braces
 set(count = 0);// 
 loop(for ch in lines[open_j]:);// beginfor
 branch(if ch == '{':);// beginif
@@ -232,7 +227,6 @@ set(updated.append((btype, sline, ob, eline)));//
 bend();// endif
 lend();// endfor
 set(blocks = updated);// 
-set();//  Second pass: inject tags
 loop(for btype, sline, ob, eline in blocks:);// beginfor
 branch(if btype in STRUCTURE_TAGS and sline is not None and eline is not None:);// beginif
 path();//
@@ -263,24 +257,25 @@ path();//
 set(open(output_file, 'w').write(final));// 
 set(print(f"Output written to {output_file}"));// 
 path(else:);// 
-output(print(final));//// //
+set(print(final));// 
 bend();// endif
 path(except Exception as e:);// 
 set(print(f"Error: {e}", file=sys.stderr));// 
 set(sys.exit(1));// 
 bend();// endtry
-end(return final);// endfunc
+set(return final);// 
+end();// endfunc
+set();// ##  // ----- DO NOT MODIFY CODE BELOW -----//
 set(VFCSEPERATOR = ';//');// 
-branch();////  Extended lists to include the new endif/endlif distinction//
+branch();//
 path(Begins = [);//// //
 set("beginfunc",);// 
 set("beginmethod",);// 
 set("beginclass",);// 
-set();//
 set("beginif",);// 
 set("begintry",);// 
+set("beginswitch",);// 
 set("beginwith",);// 
-set();//
 set("beginwhile",);// 
 set("beginfor",);// 
 set(]);// 
@@ -288,11 +283,10 @@ path(Ends = [);//// //
 set("endfunc",);// 
 set("endmethod",);// 
 set("endclass",);// 
-set();//
 set("endif",);// 
 set("endtry",);// 
+set("endswitch",);// 
 set("endwith",);// 
-set();//
 set("endfor",);// 
 set("endwhile",);// 
 set(]);// 
@@ -300,11 +294,10 @@ path(begin_type = {);//// //
 set("beginfunc": "input",);// 
 set("beginmethod": "input",);// 
 set("beginclass": "input",);// 
-set();//
 set("beginif": "branch",);// 
 set("begintry": "branch",);// 
+set("beginswitch": "branch",);// 
 set("beginwith": "branch",);// 
-set();//
 set("beginwhile": "loop",);// 
 set("beginfor": "loop",);// 
 set(});// 
@@ -312,80 +305,78 @@ path(end_type = {);//// //
 set("endfunc": "end",);// 
 set("endmethod": "end",);// 
 set("endclass": "end",);// 
-set();//
 set("endif": "bend",);// 
 set("endtry": "bend",);// 
+set("endswitch": "bend",);// 
 set("endwith": "bend",);// 
-set();//
 set("endfor": "lend",);// 
 set("endwhile": "lend",);// 
-set(});////// ////
-path(paths = [);///// ////
+set(});// 
+path(paths = [);//// //
 set("else if",);// 
-set("else",);//  for if, try, loops
-set("except",);//  for try
-set("finally",);//  for try
+set("else",);// 
+set("case",);// 
+set("except",);// 
+set("finally",);// 
 set(]);// 
-path(ends = [);///// ////
+path(ends = [);//// //
 set("return",);// 
 set("continue",);// 
+set("break",);// 
 set(]);// 
-path(events = [);///// ////
+path(events = [);//// //
 set("#include",);// 
+set("delay",);// 
 set(]);// 
-path(outputs = [);///// ////
+path(outputs = [);//// //
 set("Serial",);// 
-set(".write",);// 
+set("write",);// 
 set(]);// 
-bend();//////
+bend();//
 end();//
 
 input(def is_path(line: str) -> bool:);// beginfunc
 set(""");//
-set( );//Return True if the first word of the given line is one of the path type.
 set(""");//
 set(parts = line.strip().split(None, 1));// 
 branch(if not parts:);// beginif
 path();//
 set(return False);// 
 bend();// endif
-branch(if parts[0].strip(" :") in paths:);/// beginif//
+branch(if parts[0].strip(" :") in paths:);// beginif
 path();//
 set(return True);// 
 bend();// endif
 end();// endfunc
 
 input(def replace_string_literals(input_string):);// beginfunc
-set();//  Regular expression to match both single and double-quoted string literals
 set(result = re.sub(r'(["\'])(.*?)(\1)', '0', input_string));//
 set(return result);// 
 end();// endfunc
 
 input(def split_on_comment(input_string):);// beginfunc
-set();//  Regular expression to match the comment outside of quotes
 set(match = re.search(r'(?<!")#.*$', temp_str));//
 branch(if match:);// beginif
 path();//
-set(s1 = input_string.strip());//  Everything before the comment
-set(s2 = match.strip());//  The comment itself
+set(s1 = input_string.strip());// 
+set(s2 = match.strip());// 
 path(else:);// 
 set(s1, s2 = input_string.strip(), "");// 
 bend();// endif
 set(return (s1, s2));// 
 end();// endfunc
-set(INLINECOMMENT = '//');//
+set(INLINECOMMENT = '//');// 
 
 input(def split_string(input_string):);// beginfunc
 set(temp_str = replace_string_literals(input_string));// 
-set(parts = temp_str.split( INLINECOMMENT , 1)  # Split at the first occurrence of INLINECOMMENT ... minding literals);//  Split at the first occurrence of 0
-set();// parts = split_on_comment(input_string)
+set(parts = temp_str.split( INLINECOMMENT , 1));// 
 set(s1 = input_string.strip());// 
 branch(if len(parts) > 1 :);// beginif
 path();//
 set(s2 = parts[1]);// 
 set(s1 = s1.replace( INLINECOMMENT   + s2, ""));// 
 path(else:);// 
-set(s2 = "");//  s2 holds the second part, or remains empty
+set(s2 = "");// 
 bend();// endif
 set(return (s1, s2));// 
 end();// endfunc
@@ -400,11 +391,10 @@ set(marker = parts[0]);//
 set(return marker);// 
 end();// endfunc
 
-input(def first_token(code):);// ////
-generic();// // Split using regex to match '.', ';', and '(' as delimiters//
-generic(tokens = re.split(r'[.;(]+', code.strip()));// ////
-set();//// // Return the first token or "none" if the string is empty////
-end(return tokens[0] if tokens else "none");//// //////
+input(def first_token(code):);// beginfunc
+set(tokens = re.split(r'[.;(]+', code.strip()));// 
+set(return tokens[0] if tokens else "none");// 
+end();// endfunc
 
 input(def get_VFC_type(code : str, line: str) -> Optional[str]:);// beginfunc
 set(""");//
@@ -412,15 +402,15 @@ set(If the first word of `line` (without any leading INLINECOMMENT ) is in Begin
 set(returns its mapped type; otherwise returns None.);// 
 set(""");//
 set(token = code.strip().split(None, 1)[0] if len(code) > 1 else "none");// 
-branch(if first_token(code) in outputs:);//
+branch(if first_token(code) in outputs:);// beginif
 path();//
 set(return "output");// 
 bend();// endif
-branch(if first_token(code) in ends:);//
+branch(if first_token(code) in ends:);// beginif
 path();//
 set(return "end");// 
 bend();// endif
-branch(if token in events:);/// beginif//
+branch(if token in events:);// beginif
 path();//
 set(return "event");// 
 bend();// endif
@@ -446,25 +436,22 @@ set(return "set");//
 end();// endfunc
 
 input(def generate_VFC(input_string):);// beginfunc
-set(strings = input_string.split("\n"));//  Splits the input at each newline
+set(strings = input_string.split("\n"));// 
 set(VFC = '');// 
 loop(for string in strings:);// beginfor
-set();//  Skip empty lines
 branch(if not string.strip():);// beginif
 path();//
 set(continue);// 
 bend();// endif
 set(code, comment = split_string(string));// 
 set(code = code.strip());// 
-process(type = get_VFC_type(code, comment));//// //
+set(type = get_VFC_type(code, comment));// 
 set(marker = get_marker( comment ));// 
-set(## PRE FIX TOKENS);// # PRE FIX TOKENS 
 branch(if marker == "endclass" :);// beginif
 path();//
 set(VFC += f"bend(){VFCSEPERATOR}\n");// 
 bend();// endif
 set(VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n');// 
-set(## POST FIX TOKENS);// # POST FIX TOKENS 
 branch(if type == "branch":);// beginif
 path();//
 set(VFC += f"path(){VFCSEPERATOR}\n");// 
@@ -479,75 +466,73 @@ lend();// endfor
 set(return VFC);// 
 end();// endfunc
 
-input(def  footer( exportname  ):);//
-set();//
-set(ENVTOK = 'INSECTA');//
-generic(foot = f';{ENVTOK} EMBEDDED SESSION INFORMATION\n');//  
-generic(foot+='; 255 16777215 65280 16777088 16711680 32896 8421504 0 255 255 16777215 4227327 2960640\n');//  
-generic(foot+= f';    { os.path.basename(exportname) } // \n');// 
-generic(foot+='; notepad.exe\n');//  
-generic(foot+=f';{ENVTOK} EMBEDDED ALTSESSION INFORMATION\n');//  
-generic(foot+='; 880 168 766 1516 0 110   392   31    ino.key  0\n');//  
-end(return foot);//
+input(def  footer( exportname  ):);// beginfunc
+set(ENVTOK = 'INSECTA');// 
+set(foot = f';{ENVTOK} EMBEDDED SESSION INFORMATION\n');// 
+set(foot+='; 255 16777215 65280 16777088 16711680 32896 8421504 0 255 255 16777215 4227327 2960640\n');// 
+set(foot+= f';    { os.path.basename(exportname) } // \n');// 
+set(foot+='; notepad.exe\n');// 
+set(foot+=f';{ENVTOK} EMBEDDED ALTSESSION INFORMATION\n');// 
+set(foot+='; 880 168 766 1516 0 110   392   31    ino.key  0\n');// 
+set(return foot);// 
+end();// endfunc
 
 input(def __fix_VFC_paths( input_string ):);// beginfunc
-set(strings = input_string.split("\n"));//  Splits the input at each newline
+set(strings = input_string.split("\n"));// 
 set(VFC = '');// 
-generic(skip_next = 0);// // Tracks how many items to skip//
+set(skip_next = 0);// 
 loop(for i  in range( len(strings) ) :);// beginfor
-set(code = strings[i]);//
-branch(if code.startswith( "branch")  :);//
+set(code = strings[i]);// 
+branch(if code.startswith( "branch")  :);// beginif
 path();//
-set(code2 = strings[i+1].strip());//
-set(code3 = strings[i+2].strip());//
-output();//input( f"---> {code3} , {code2} , {code}" )
-branch(if code2.startswith("path()")   and   code3.startswith("set({)"):);//
+set(code2 = strings[i+1].strip());// 
+set(code3 = strings[i+2].strip());// 
+branch(if code2.startswith("path()")   and   code3.startswith("set({)"):);// beginif
 path();//
 set(VFC +=code + "\n");// 
 set(VFC += "path({)" + VFCSEPERATOR  + '\n');// 
-generic(skip_next = 3);//skip_next = 2
+set(skip_next = 3);// 
 bend();// endif
 bend();// endif
-branch(if skip_next > 0:);// ////
+branch(if skip_next > 0:);// beginif
 path();//
-set(skip_next -= 1);//// //////
-end(continue);// // Skip the iteration//
-bend();//
+set(skip_next -= 1);// 
+set(continue);// 
+bend();// endif
 set(VFC +=code + "\n");// 
 lend();// endfor
 set(return VFC);// 
 end();// endfunc
 
 input(def fix_VFC_paths( input_string ):);// beginfunc
-set(strings = input_string.split("\n"));//  Splits the input at each newline
+set(strings = input_string.split("\n"));// 
 set(VFC = '');// 
-generic(skip_next = 0);// // Tracks how many items to skip//
+set(skip_next = 0);// 
 loop(for i  in range( len(strings) ) :);// beginfor
-set(code = strings[i]);//
-branch(if code.startswith( "branch")  :);//
+set(code = strings[i]);// 
+branch(if code.startswith( "branch")  :);// beginif
 path();//
-set(code2 = strings[i+1].strip());//
-set(code3 = strings[i+2].strip());//
-output();//input( f"---> {code3} , {code2} , {code}" )
-branch(if code2.startswith("path()")   and   code3.startswith("set({)"):);//
+set(code2 = strings[i+1].strip());// 
+set(code3 = strings[i+2].strip());// 
+branch(if code2.startswith("path()")   and   code3.startswith("set({)"):);// beginif
 path();//
 set(VFC +=code + "\n");// 
 set(VFC += "path({)" + VFCSEPERATOR  + '\n');// 
-generic(skip_next = 3);//skip_next = 2
+set(skip_next = 3);// 
 bend();// endif
 bend();// endif
-branch(if skip_next > 0:);// ////
+branch(if skip_next > 0:);// beginif
 path();//
-set(skip_next -= 1);//// //////
-end(continue);// // Skip the iteration//
-bend();//
+set(skip_next -= 1);// 
+set(continue);// 
+bend();// endif
 set(VFC +=code + "\n");// 
 lend();// endfor
 set(return VFC);// 
 end();// endfunc
 
 input(def main():);// beginfunc
-set(global modified_code);//
+set(global modified_code);// 
 set(p = argparse.ArgumentParser());// 
 set(p.add_argument('input_file'));// 
 set(p.add_argument('-o', '--output'));// 
@@ -555,18 +540,20 @@ set(p.add_argument('--skip-format', action='store_true'));//
 set(args = p.parse_args());// 
 set(modified_code  = process_file(args.input_file, args.output, args.skip_format));// 
 set(VFC = generate_VFC(modified_code));// 
-process(VFC = fix_VFC_paths( VFC ));//
-output(print( modified_code ));//print( VFC )
+set(VFC = fix_VFC_paths( VFC ));// 
+set(print( modified_code ));// 
 branch(with open(args.input_file+'.vfc', 'w') as VFC_output:);// beginwith
 path();//
 set(VFC_output.write(VFC));// 
 set(VFC_output.write( footer( args.input_file ) ));// 
 bend();// endwith
 end();// endfunc
+set();// ##  // ----- DO NOT MODIFY CODE ABOVE -----//
 branch(if __name__ == '__main__':);// beginif
 path();//
 set(main());// 
 bend();// endif
+set();//   Export  Date: 11:42:56 AM - 23:Apr:2025.
 
 
 
@@ -575,4 +562,4 @@ bend();// endif
 ;    inoCommentParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 1424 273 1171 1516 467 128   567   4294952735    python.key  0
+; 1381 239 1423 1882 0 190   4294966649   4294954333    python.key  0

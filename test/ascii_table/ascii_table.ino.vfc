@@ -38,16 +38,17 @@ output(Serial.print(thisByte, OCT););//
 output(Serial.print(", bin: "););// 
 output(Serial.println(thisByte, BIN););// 
 set(// if printed last visible character '~' or 126, stop:);//  if printed last visible character 0 or 126, stop:
-set(if (thisByte == 126));// 
+branch(if (thisByte == 126));// beginif
+path();//
 set({ // you could also use if (thisByte == '~') {);//  you could also use if (thisByte == 0) {
 loop(while (true));// beginwhile
 set({);// 
 end(continue;);// 
 lend(});// endwhile
-set(});// 
+bend(});// endif
 set(thisByte++;);// 
 end(});// endfunc
-set();//   Export  Date: 10:48:54 AM - 23:Apr:2025;
+set();//   Export  Date: 10:56:33 AM - 23:Apr:2025;
 
 ;INSECTA EMBEDDED SESSION INFORMATION
 ; 255 16777215 65280 16777088 16711680 32896 8421504 0 255 255 16777215 4227327 2960640

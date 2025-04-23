@@ -1,4 +1,3 @@
-
 """
 Complete Arduino Structure Comment Parser
 A two-phase parser that:
@@ -13,9 +12,11 @@ import argparse
 import tempfile
 import re
 from typing import List, Tuple, Optional, Set
-
-STRUCTURE_TAGS = {"if": ("beginif", "endif"), "for": ("beginfor", "endfor"), "while": ("beginwhile", "endwhile"), "function": ("beginfunc", "endfunc")}
-
+STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),
+"for":     ("beginfor",    "endfor"),
+"while":   ("beginwhile",  "endwhile"),
+"switch":  ("beginswitch","endswitch"),
+"function":("beginfunc",   "endfunc")}
 config = """
 Language: Cpp
 BasedOnStyle: Google
@@ -91,7 +92,6 @@ def format_code(code: str) -> str:
 		sys.exit(1)
 		
 	
-
 def add_structure_comments(code: str) -> str:
 	"""
 	Add structure comments focusing only on selected block types, handling if-else chains.
@@ -102,12 +102,11 @@ def add_structure_comments(code: str) -> str:
 	"""
 	lines = code.split('\n')
 	result = lines.copy()
-	
-	function_regex = re.compile(r'^\s*(?!(?:if|for|while|else)\b)[\w\s\*\&\:\<\>\~]+\w+\s*\([^;{]*\)\s*$')
+	#function_regex = re.compile(r'^\s*(?!(?:if|for|while|else)\b)[\w\s\*\&\:\<\>\~]+\w+\s*\([^;{]*\)\s*$')
+	function_regex = re.compile(r'^\s*(?!(?:if|for|while|else|switch)\b)[\w\s\*\&\:\<\>\~]+\w+\s*\([^;{]*\)\s*$')
 	blocks: List[Tuple[str, int, Optional[int], Optional[int]]] = []
 	brace_stack: List[Tuple[int, int, Optional[int]]] = []
 	tagged_lines: Set[int] = set()
-	
 	for i, line in enumerate(lines):
 		stripped = line.strip()
 		if not stripped or stripped.startswith('//'):
@@ -115,7 +114,6 @@ def add_structure_comments(code: str) -> str:
 			continue
 			
 		indent = len(line) - len(line.lstrip())
-		
 		if re.match(r'^\s*if\s*\(', stripped):
 		
 			blocks.append(('if', i, None, None))
@@ -123,14 +121,15 @@ def add_structure_comments(code: str) -> str:
 			blocks.append(('for', i, None, None))
 		elif re.match(r'^\s*while\s*\(', stripped):
 			blocks.append(('while', i, None, None))
-			
+		elif re.match(r'^\s*switch\s*\(', stripped):
+			blocks.append(('switch', i, None, None))
 		elif function_regex.match(stripped):
 			blocks.append(('function', i, None, None))
 			
 			
 			
 			
-		
+			
 		if '{' in stripped:
 		
 			if blocks and blocks[-1][1] in (i, i - 1) and blocks[-1][2] is None:
@@ -143,7 +142,6 @@ def add_structure_comments(code: str) -> str:
 				
 			brace_stack.append((i, indent, bidx))
 			
-		
 		if '}' in stripped:
 		
 			if brace_stack:
@@ -157,7 +155,6 @@ def add_structure_comments(code: str) -> str:
 				
 			
 		
-	
 	
 	updated = []
 	for btype, sline, ob, eline in blocks:
@@ -174,7 +171,6 @@ def add_structure_comments(code: str) -> str:
 					
 				if st.startswith('else'):
 				
-					
 					# locate '{'
 					if '{' in st:
 					
@@ -187,7 +183,6 @@ def add_structure_comments(code: str) -> str:
 						
 						open_j = k
 						
-					
 					count = 0
 					for ch in lines[open_j]:
 						if ch == '{':
@@ -230,7 +225,6 @@ def add_structure_comments(code: str) -> str:
 		
 	
 	blocks = updated
-	
 	for btype, sline, ob, eline in blocks:
 		if btype in STRUCTURE_TAGS and sline is not None and eline is not None:
 		
@@ -268,17 +262,17 @@ def process_file(input_file: str, output_file: str = None, skip_format: bool = F
 		sys.exit(1)
 		
 	return final
-VFCSEPERATOR = ';//'
+	
 
+VFCSEPERATOR = ';//'
 Begins = [
 	"beginfunc",
 	"beginmethod",
 	"beginclass",
-	
 	"beginif",
 	"begintry",
+	"beginswitch",
 	"beginwith",
-	
 	"beginwhile",
 	"beginfor",
 	]
@@ -286,11 +280,10 @@ Ends = [
 	"endfunc",
 	"endmethod",
 	"endclass",
-	
 	"endif",
 	"endtry",
+	"endswitch",
 	"endwith",
-	
 	"endfor",
 	"endwhile",
 	]
@@ -298,11 +291,10 @@ begin_type = {
 	"beginfunc": "input",
 	"beginmethod": "input",
 	"beginclass": "input",
-	
 	"beginif": "branch",
 	"begintry": "branch",
+	"beginswitch": "branch",
 	"beginwith": "branch",
-	
 	"beginwhile": "loop",
 	"beginfor": "loop",
 	}
@@ -310,36 +302,37 @@ end_type = {
 	"endfunc": "end",
 	"endmethod": "end",
 	"endclass": "end",
-	
 	"endif": "bend",
 	"endtry": "bend",
+	"endswitch": "bend",
 	"endwith": "bend",
-	
 	"endfor": "lend",
 	"endwhile": "lend",
 	}
 paths = [
 	"else if",
 	"else",
+	"case",
 	"except",
 	"finally",
 	]
 ends = [
 	"return",
 	"continue",
+	"break",
 	]
 events = [
 	"#include",
+	"delay",
 	]
 outputs = [
 	"Serial",
-	".write",
+	"write",
 	]
 	
 
 def is_path(line: str) -> bool:
 	"""
-	
 	"""
 	parts = line.strip().split(None, 1)
 	if not parts:
@@ -352,12 +345,10 @@ def is_path(line: str) -> bool:
 		
 	
 def replace_string_literals(input_string):
-	
 	result = re.sub(r'(["\'])(.*?)(\1)', '0', input_string)
 	return result
 	
 def split_on_comment(input_string):
-	
 	match = re.search(r'(?<!")#.*$', temp_str)
 	if match:
 	
@@ -371,8 +362,7 @@ def split_on_comment(input_string):
 INLINECOMMENT = '//'
 def split_string(input_string):
 	temp_str = replace_string_literals(input_string)
-	parts = temp_str.split( INLINECOMMENT , 1)  # Split at the first occurrence of INLINECOMMENT ... minding literals
-	
+	parts = temp_str.split( INLINECOMMENT , 1)
 	s1 = input_string.strip()
 	if len(parts) > 1 :
 	
@@ -393,10 +383,9 @@ def get_marker( comment ):
 	return marker
 	
 def first_token(code):
-	
 	tokens = re.split(r'[.;(]+', code.strip())
-	
 	return tokens[0] if tokens else "none"
+	
 def get_VFC_type(code : str, line: str) -> Optional[str]:
 	"""
 	If the first word of `line` (without any leading INLINECOMMENT ) is in Begins or Ends,
@@ -439,7 +428,6 @@ def generate_VFC(input_string):
 	strings = input_string.split("\n")
 	VFC = ''
 	for string in strings:
-		
 		if not string.strip():
 		
 			continue
@@ -448,13 +436,11 @@ def generate_VFC(input_string):
 		code = code.strip()
 		type = get_VFC_type(code, comment)
 		marker = get_marker( comment )
-		## PRE FIX TOKENS
 		if marker == "endclass" :
 		
 			VFC += f"bend(){VFCSEPERATOR}\n"
 			
 		VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n'
-		## POST FIX TOKENS
 		if type == "branch":
 		
 			VFC += f"path(){VFCSEPERATOR}\n"
@@ -470,7 +456,6 @@ def generate_VFC(input_string):
 	return VFC
 	
 def  footer( exportname  ):
-	
 	ENVTOK = 'INSECTA'
 	foot = f';{ENVTOK} EMBEDDED SESSION INFORMATION\n'
 	foot+='; 255 16777215 65280 16777088 16711680 32896 8421504 0 255 255 16777215 4227327 2960640\n'
@@ -479,6 +464,7 @@ def  footer( exportname  ):
 	foot+=f';{ENVTOK} EMBEDDED ALTSESSION INFORMATION\n'
 	foot+='; 880 168 766 1516 0 110   392   31    ino.key  0\n'
 	return foot
+	
 def __fix_VFC_paths( input_string ):
 	strings = input_string.split("\n")
 	VFC = ''
@@ -489,7 +475,6 @@ def __fix_VFC_paths( input_string ):
 		
 			code2 = strings[i+1].strip()
 			code3 = strings[i+2].strip()
-			
 			if code2.startswith("path()")   and   code3.startswith("set({)"):
 			
 				VFC +=code + "\n"
@@ -517,7 +502,6 @@ def fix_VFC_paths( input_string ):
 		
 			code2 = strings[i+1].strip()
 			code3 = strings[i+2].strip()
-			
 			if code2.startswith("path()")   and   code3.startswith("set({)"):
 			
 				VFC +=code + "\n"
@@ -552,9 +536,11 @@ def main():
 		VFC_output.write( footer( args.input_file ) )
 		
 	
+
 if __name__ == '__main__':
 
 	main()
 	
-#  Export  Date: 10:52:47 AM - 23:Apr:2025.
+
+#  Export  Date: 12:09:11 PM - 23:Apr:2025.
 
