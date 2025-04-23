@@ -1,0 +1,260 @@
+event(#include "esp_camera.h"););// ////
+event(#include <WiFi.h>);// 
+event(#include "FS.h"););// 
+event(#include "SD_MMC.h");// 
+event(#include <Vector.h>);// 
+input(void callback());// beginfunc
+set({);// 
+set(Serial.println("==========CALLED========="););// 
+end(});// endfunc
+input(char *readLine(File file, char *buffer, int buff_size));// beginfunc
+set({);// 
+set(buffer[0] = NULL;);// 
+set(int len = 0;);// 
+branch(if (!file));// beginif
+path();//
+set({);// 
+set(Serial.println("Failed to open file for reading"););// 
+end(return NULL;);// 
+bend(});// endif
+set(char c = file.read(););// 
+loop(while (file.available() && len < buff_size));// beginwhile
+set({);// 
+branch(if (c == '\n'));// beginif
+path();//
+set({);// 
+set(buffer[len] = NULL;);// 
+set(break;);// 
+set(});// 
+path(else);// 
+set({);// 
+set(buffer[len++] = c;);// 
+bend(});// endif
+set(c = file.read(););// 
+lend(});// endwhile
+end(return buffer;);// 
+end(});// endfunc
+input(void setupSDCARD());// beginfunc
+set({);// 
+set(Serial.begin(115200););// 
+branch(if (!SD_MMC.begin()));// beginif
+path();//
+set({);// 
+set(Serial.println("Card Mount Failed"););// 
+set(return;);// 
+bend(});// endif
+set(uint8_t cardType = SD_MMC.cardType(););// 
+branch(if (cardType == CARD_NONE));// beginif
+path();//
+set({);// 
+set(Serial.println("No SD_MMC card attached"););// 
+set(return;);// 
+bend(});// endif
+set(Serial.print("SD_MMC Card Type: "););// 
+branch(if (cardType == CARD_MMC));// beginif
+path();//
+set({);// 
+set(Serial.println("MMC"););// 
+set(});// 
+path(else if (cardType == CARD_SD));// 
+set({);// 
+set(Serial.println("SDSC"););// 
+set(});// 
+path(else if (cardType == CARD_SDHC));// 
+set({);// 
+set(Serial.println("SDHC"););// 
+set(});// 
+path(else);// 
+set({);// 
+set(Serial.println("UNKNOWN"););// 
+bend(});// endif
+set(uint64_t cardSize = SD_MMC.cardSize() / (1024 * 1024););// 
+set(Serial.printf("SD_MMC Card Size: %lluMB\n", cardSize););// 
+set(Serial.printf("Total space: %lluMB\n", SD_MMC.totalBytes() / (1024 * 1024)););// 
+set(Serial.printf("Used space: %lluMB\n", SD_MMC.usedBytes() / (1024 * 1024)););// 
+set(listDir(SD_MMC, "/", 0););// 
+set(char ssid[100];);// 
+set(char pwd[100];);// 
+set(File file = SD_MMC.open("/network.txt"););// 
+set(readLine(file, ssid, 100););// 
+set(readLine(file, pwd, 100););// 
+set(Serial.println("\n----------------------------------------------------------------------"););// 
+set(Serial.println(ssid););// 
+set(Serial.println(pwd););// 
+end(});// endfunc
+input(void listDir(fs::FS &fs, const char *dirname, uint8_t levels));// beginfunc
+set({);// 
+set(Serial.printf("Listing directory: %s\n", dirname););// 
+set(File root = fs.open(dirname););// 
+branch(if (!root));// beginif
+path();//
+set({);// 
+set(Serial.println("Failed to open directory"););// 
+set(return;);// 
+bend(});// endif
+branch(if (!root.isDirectory()));// beginif
+path();//
+set({);// 
+set(Serial.println("Not a directory"););// 
+set(return;);// 
+bend(});// endif
+set(File file = root.openNextFile(););// 
+loop(while (file));// beginwhile
+set({);// 
+branch(if (file.isDirectory()));// beginif
+path();//
+set({);// 
+set(Serial.print("  DIR : "););// 
+set(Serial.println(file.name()););// 
+branch(if (levels));// beginif
+path();//
+set({);// 
+set(listDir(fs, file.name(), levels - 1););// 
+bend(});// endif
+set(});// 
+path(else);// 
+set({);// 
+set(Serial.print("  FILE: "););// 
+set(Serial.print(file.name()););// 
+set(Serial.print("  SIZE: "););// 
+set(Serial.println(file.size()););// 
+bend(});// endif
+set(file = root.openNextFile(););// 
+lend(});// endwhile
+end(});// endfunc
+set(void disconnect_bluetooth());// 
+set({);// 
+set(});// 
+set();//  Partial images will be transmitted if image exceeds buffer size
+set();// #define CAMERA_MODEL_M5STACK_PSRAM // Has PSRAM
+set();// #define CAMERA_MODEL_M5STACK_ESP32CAM // No PSRAM
+set(#define CAMERA_MODEL_AI_THINKER);// 
+event(#include "camera_pins.h");// 
+set(void startCameraServer(););// 
+input(void setup());// beginfunc
+set({);// 
+set(Serial.begin(115200););// 
+set(camera_config_t config;);// 
+set(config.ledc_channel = LEDC_CHANNEL_0;);// 
+set(config.ledc_timer = LEDC_TIMER_0;);// 
+set(config.pin_d0 = Y2_GPIO_NUM;);// 
+set(config.pin_d1 = Y3_GPIO_NUM;);// 
+set(config.pin_d2 = Y4_GPIO_NUM;);// 
+set(config.pin_d3 = Y5_GPIO_NUM;);// 
+set(config.pin_d4 = Y6_GPIO_NUM;);// 
+set(config.pin_d5 = Y7_GPIO_NUM;);// 
+set(config.pin_d6 = Y8_GPIO_NUM;);// 
+set(config.pin_d7 = Y9_GPIO_NUM;);// 
+set(config.pin_xclk = XCLK_GPIO_NUM;);// 
+set(config.pin_pclk = PCLK_GPIO_NUM;);// 
+set(config.pin_vsync = VSYNC_GPIO_NUM;);// 
+set(config.pin_href = HREF_GPIO_NUM;);// 
+set(config.pin_sscb_sda = SIOD_GPIO_NUM;);// 
+set(config.pin_sscb_scl = SIOC_GPIO_NUM;);// 
+set(config.pin_pwdn = PWDN_GPIO_NUM;);// 
+set(config.pin_reset = RESET_GPIO_NUM;);// 
+set(config.xclk_freq_hz = 20000000;);// 
+set(config.pixel_format = PIXFORMAT_JPEG;);// 
+branch(if (psramFound()));// beginif
+path();//
+set({);// 
+set(Serial.println("Higher Quality"););// 
+set(config.frame_size = FRAMESIZE_QVGA;);// 
+set(config.jpeg_quality = 12;);// 
+set(config.fb_count = 2;);// 
+set(});// 
+path(else);// 
+set({);// 
+set(Serial.println("Lower Quality"););// 
+set(config.frame_size = FRAMESIZE_SVGA;);// 
+set(config.jpeg_quality = 12;);// 
+set(config.fb_count = 1;);// 
+bend(});// endif
+set(#if defined(CAMERA_MODEL_ESP_EYE));// 
+set(pinMode(13, INPUT_PULLUP););// 
+set(pinMode(14, INPUT_PULLUP););// 
+set(#endif);// 
+set(esp_err_t err = esp_camera_init(&config););// 
+branch(if (err != ESP_OK));// beginif
+path();//
+set({);// 
+set(Serial.printf("Camera init failed with error 0x%x", err););// 
+set(return;);// 
+bend(});// endif
+set(sensor_t *s = esp_camera_sensor_get(););// 
+branch(if (s->id.PID == OV3660_PID));// beginif
+path();//
+set({);// 
+set(s->set_vflip(s, 1););// 
+set(s->set_brightness(s, 1););// 
+set(s->set_saturation(s, -2););// 
+bend(});// endif
+set(#if defined(CAMERA_MODEL_M5STACK_WIDE) || defined(CAMERA_MODEL_M5STACK_ESP32CAM));// 
+set(s->set_vflip(s, 1););// 
+set(s->set_hmirror(s, 1););// 
+set(#endif);// 
+branch(if (!SD_MMC.begin()));// beginif
+path();//
+set({);// 
+set(Serial.println("Card Mount Failed"););// 
+set(return;);// 
+bend(});// endif
+set(char ssid[100];);// 
+set(char pwd[100];);// 
+set(char staticIP[100];);// 
+set(File file = SD_MMC.open("/network.txt"););// 
+set(readLine(file, ssid, 100););// 
+set(readLine(file, pwd, 100););// 
+set(readLine(file, staticIP, 100););// 
+set(int hostNumber;);// 
+set(IPAddress local_IP = getIPfromString(staticIP, &hostNumber););// 
+branch(if (hostNumber % 2 == 1));// beginif
+path();//
+set({);// 
+set(Serial.println("ODD HOST - flipping "););// 
+set(s->set_vflip(s, 1););// 
+set(s->set_hmirror(s, 1););// 
+bend(});// endif
+set(IPAddress gateway(192, 168, 0, 1););// 
+set(IPAddress subnet(255, 255, 255, 0););// 
+set(IPAddress primaryDNS(8, 8, 8, 8););// 
+set(IPAddress secondaryDNS(8, 8, 4, 4););// 
+branch(if (!WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS)));// beginif
+path();//
+set({);// 
+set(Serial.println("STA Failed to configure"););// 
+bend(});// endif
+set(WiFi.begin(ssid, pwd););// 
+loop(while (WiFi.status() != WL_CONNECTED));// beginwhile
+set({);// 
+set(delay(500););// 
+set(Serial.print("."););// 
+lend(});// endwhile
+set(Serial.println(""););// 
+set(Serial.println("WiFi connected"););// 
+set(startCameraServer(););// 
+set(Serial.print("Camera Ready! Use http: "););// 
+set(Serial.print(WiFi.localIP()););// 
+set(Serial.println("' to connect"););// 
+end(});// endfunc
+input(IPAddress getIPfromString(char *chs, int *hostNumber));// beginfunc
+set({);// 
+set(String S = String(chs););// 
+set(int A, B, C, D;);// 
+set(int a = S.indexOf('.'););// 
+set(int b = S.indexOf('.', a + 1););// 
+set(int c = S.indexOf('.', b + 1););// 
+set(A = S.substring(0, a).toInt(););// 
+set(B = S.substring(a + 1, b).toInt(););// 
+set(C = S.substring(b + 1, c).toInt(););// 
+set(D = S.substring(c + 1).toInt(););// 
+set(*hostNumber = D;);// 
+set(Serial.println(D););// 
+set(IPAddress IP(A, B, C, D););// 
+end(return IP;);// 
+end(});// endfunc
+input(void loop());// beginfunc
+set({);// 
+set(delay(10000););// 
+end(});// endfunc
+set();//   Export  Date: 07:21:59 PM - 22:Apr:2025;

@@ -1,0 +1,259 @@
+#include "esp_camera.h"); //////
+#include <WiFi.h>
+#include "FS.h");
+#include "SD_MMC.h"
+#include <Vector.h>
+
+void callback() //beginfunc
+{
+    Serial.println("==========CALLED=========");
+} //endfunc
+char *readLine(File file, char *buffer, int buff_size) //beginfunc
+{
+    buffer[0] = NULL;
+
+    int len = 0;
+    if (!file) //beginif
+    {
+        Serial.println("Failed to open file for reading");
+        return NULL;
+    } //endif
+    char c = file.read();
+    while (file.available() && len < buff_size) //beginwhile
+    {
+        if (c == '\n') //beginif
+        {
+            buffer[len] = NULL;
+            break;
+        }
+            else
+        {
+            buffer[len++] = c;
+        } //endif
+        c = file.read();
+    } //endwhile
+
+    return buffer;
+} //endfunc
+void setupSDCARD() //beginfunc
+{
+    Serial.begin(115200);
+    if (!SD_MMC.begin()) //beginif
+    {
+        Serial.println("Card Mount Failed");
+        return;
+    } //endif
+    uint8_t cardType = SD_MMC.cardType();
+    if (cardType == CARD_NONE) //beginif
+    {
+        Serial.println("No SD_MMC card attached");
+        return;
+    } //endif
+    Serial.print("SD_MMC Card Type: ");
+    if (cardType == CARD_MMC) //beginif
+    {
+        Serial.println("MMC");
+    }
+        else if (cardType == CARD_SD)
+    {
+        Serial.println("SDSC");
+    }
+        else if (cardType == CARD_SDHC)
+    {
+        Serial.println("SDHC");
+    }
+        else
+    {
+        Serial.println("UNKNOWN");
+    } //endif
+    uint64_t cardSize = SD_MMC.cardSize() / (1024 * 1024);
+    Serial.printf("SD_MMC Card Size: %lluMB\n", cardSize);
+    Serial.printf("Total space: %lluMB\n", SD_MMC.totalBytes() / (1024 * 1024));
+    Serial.printf("Used space: %lluMB\n", SD_MMC.usedBytes() / (1024 * 1024));
+    listDir(SD_MMC, "/", 0);
+
+    char ssid[100];
+    char pwd[100];
+    File file = SD_MMC.open("/network.txt");
+    readLine(file, ssid, 100);
+    readLine(file, pwd, 100);
+    Serial.println("\n----------------------------------------------------------------------");
+    Serial.println(ssid);
+    Serial.println(pwd);
+} //endfunc
+void listDir(fs::FS &fs, const char *dirname, uint8_t levels) //beginfunc
+{
+    Serial.printf("Listing directory: %s\n", dirname);
+    File root = fs.open(dirname);
+    if (!root) //beginif
+    {
+        Serial.println("Failed to open directory");
+        return;
+    } //endif
+    if (!root.isDirectory()) //beginif
+    {
+        Serial.println("Not a directory");
+        return;
+    } //endif
+    File file = root.openNextFile();
+    while (file) //beginwhile
+    {
+        if (file.isDirectory()) //beginif
+        {
+            Serial.print("  DIR : ");
+            Serial.println(file.name());
+            if (levels) //beginif
+            {
+                listDir(fs, file.name(), levels - 1);
+            } //endif
+        }
+            else
+        {
+            Serial.print("  FILE: ");
+            Serial.print(file.name());
+            Serial.print("  SIZE: ");
+            Serial.println(file.size());
+        } //endif
+        file = root.openNextFile();
+    } //endwhile
+} //endfunc
+void disconnect_bluetooth()
+
+{
+}
+// Partial images will be transmitted if image exceeds buffer size
+//#define CAMERA_MODEL_M5STACK_PSRAM // Has PSRAM
+//#define CAMERA_MODEL_M5STACK_ESP32CAM // No PSRAM
+#define CAMERA_MODEL_AI_THINKER
+#include "camera_pins.h"
+void startCameraServer();
+void setup() //beginfunc
+{
+    Serial.begin(115200);
+    camera_config_t config;
+    config.ledc_channel = LEDC_CHANNEL_0;
+    config.ledc_timer = LEDC_TIMER_0;
+    config.pin_d0 = Y2_GPIO_NUM;
+    config.pin_d1 = Y3_GPIO_NUM;
+    config.pin_d2 = Y4_GPIO_NUM;
+    config.pin_d3 = Y5_GPIO_NUM;
+    config.pin_d4 = Y6_GPIO_NUM;
+    config.pin_d5 = Y7_GPIO_NUM;
+    config.pin_d6 = Y8_GPIO_NUM;
+    config.pin_d7 = Y9_GPIO_NUM;
+    config.pin_xclk = XCLK_GPIO_NUM;
+    config.pin_pclk = PCLK_GPIO_NUM;
+    config.pin_vsync = VSYNC_GPIO_NUM;
+    config.pin_href = HREF_GPIO_NUM;
+    config.pin_sscb_sda = SIOD_GPIO_NUM;
+    config.pin_sscb_scl = SIOC_GPIO_NUM;
+    config.pin_pwdn = PWDN_GPIO_NUM;
+    config.pin_reset = RESET_GPIO_NUM;
+    config.xclk_freq_hz = 20000000;
+    config.pixel_format = PIXFORMAT_JPEG;
+    if (psramFound()) //beginif
+    {
+        Serial.println("Higher Quality");
+        config.frame_size = FRAMESIZE_QVGA;
+        config.jpeg_quality = 12;
+        config.fb_count = 2;
+    }
+        else
+    {
+        Serial.println("Lower Quality");
+        config.frame_size = FRAMESIZE_SVGA;
+        config.jpeg_quality = 12;
+        config.fb_count = 1;
+    } //endif
+#if defined(CAMERA_MODEL_ESP_EYE)
+
+    pinMode(13, INPUT_PULLUP);
+    pinMode(14, INPUT_PULLUP);
+#endif
+    esp_err_t err = esp_camera_init(&config);
+    if (err != ESP_OK) //beginif
+    {
+        Serial.printf("Camera init failed with error 0x%x", err);
+        return;
+    } //endif
+    sensor_t *s = esp_camera_sensor_get();
+    if (s->id.PID == OV3660_PID) //beginif
+    {
+        s->set_vflip(s, 1);
+        s->set_brightness(s, 1);
+        s->set_saturation(s, -2);
+    } //endif
+#if defined(CAMERA_MODEL_M5STACK_WIDE) || defined(CAMERA_MODEL_M5STACK_ESP32CAM)
+
+    s->set_vflip(s, 1);
+    s->set_hmirror(s, 1);
+#endif
+
+    if (!SD_MMC.begin()) //beginif
+    {
+        Serial.println("Card Mount Failed");
+        return;
+    } //endif
+    char ssid[100];
+    char pwd[100];
+    char staticIP[100];
+    File file = SD_MMC.open("/network.txt");
+    readLine(file, ssid, 100);
+    readLine(file, pwd, 100);
+    readLine(file, staticIP, 100);
+
+    int hostNumber;
+    IPAddress local_IP = getIPfromString(staticIP, &hostNumber);
+    if (hostNumber % 2 == 1) //beginif
+    {
+        Serial.println("ODD HOST - flipping ");
+        s->set_vflip(s, 1);
+        s->set_hmirror(s, 1);
+    } //endif
+
+    IPAddress gateway(192, 168, 0, 1);
+    IPAddress subnet(255, 255, 255, 0);
+    IPAddress primaryDNS(8, 8, 8, 8);
+    IPAddress secondaryDNS(8, 8, 4, 4);
+
+    if (!WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS)) //beginif
+    {
+        Serial.println("STA Failed to configure");
+    } //endif
+
+    WiFi.begin(ssid, pwd);
+    while (WiFi.status() != WL_CONNECTED) //beginwhile
+    {
+        delay(500);
+        Serial.print(".");
+    } //endwhile
+
+    Serial.println("");
+    Serial.println("WiFi connected");
+    startCameraServer();
+    Serial.print("Camera Ready! Use http: ");
+    Serial.print(WiFi.localIP());
+    Serial.println("' to connect");
+} //endfunc
+IPAddress getIPfromString(char *chs, int *hostNumber) //beginfunc
+{
+    String S = String(chs);
+    int A, B, C, D;
+    int a = S.indexOf('.');
+    int b = S.indexOf('.', a + 1);
+    int c = S.indexOf('.', b + 1);
+    A = S.substring(0, a).toInt();
+    B = S.substring(a + 1, b).toInt();
+    C = S.substring(b + 1, c).toInt();
+    D = S.substring(c + 1).toInt();
+    *hostNumber = D;
+    Serial.println(D);
+    IPAddress IP(A, B, C, D);
+    return IP;
+} //endfunc
+void loop() //beginfunc
+{
+    delay(10000);
+} //endfunc
+
+//  Export  Date: 07:21:59 PM - 22:Apr:2025;
