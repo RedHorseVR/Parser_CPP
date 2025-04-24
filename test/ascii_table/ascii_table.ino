@@ -12,6 +12,10 @@ by Tom Igoe
 This example code is in the public domain.
 https:
 */
+
+
+const int sensorMin = 0;
+const int sensorMax = 600;
 void setup()
 	{
 	Serial.begin(9600);
@@ -40,15 +44,34 @@ void loop()
 	Serial.println(thisByte, BIN);
 	// if printed last visible character '~' or 126, stop:
 	if (thisByte == 126)
-	{ // you could also use if (thisByte == '~') {
-	while (true)
-		{
-		continue;
-		}
 	
-	}
+		{ // you could also use if (thisByte == '~') {
+		delay(4000);
+		while (true)
+			{
+			int sensorReading = analogRead(A0);
+			int range = map(sensorReading, sensorMin, sensorMax, 0, 3);
+			switch (range)
+			{
+			case 0:
+				Serial.println("dark");
+				break;
+			case 1:
+				Serial.println("dim");
+				break;
+			case 2:
+				Serial.println("medium");
+				break;
+			case 3:
+				Serial.println("bright");
+				break;
+				}
+			continue;
+			}
+		
+		}
 	thisByte++;
 	}
 
-//  Export  Date: 10:56:33 AM - 23:Apr:2025;
+//  Export  Date: 11:35:29 PM - 23:Apr:2025;
 

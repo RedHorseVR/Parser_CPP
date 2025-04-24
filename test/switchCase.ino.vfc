@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : switchCase.ino.vfc
-;  File Date : 10:15:05 PM - 23:Apr:2025
+;  File Date : 11:35:57 PM - 23:Apr:2025
 
 set(/*);// 
 set(Switch statement);// 
@@ -63,4 +63,4 @@ end(});// endfunc
 ;    switchCase.ino   //   ;
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 482 313 1612 980 0 170   396   4294966031    ino.key  0
+; 482 313 1753 1031 0 170   389   4294966067    ino.key  0

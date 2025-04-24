@@ -12,16 +12,11 @@ import argparse
 import tempfile
 import re
 from typing import List, Tuple, Optional, Set
-
-
-
 STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),
-				"for":     ("beginfor",    "endfor"),
-				"while":   ("beginwhile",  "endwhile"),
-				"switch":  ("beginswitch","endswitch"),
-				"function":("beginfunc",   "endfunc")}
-
-
+"for":     ("beginfor",    "endfor"),
+"while":   ("beginwhile",  "endwhile"),
+"switch":  ("beginswitch","endswitch"),
+"function":("beginfunc",   "endfunc")}
 config = """
 Language: Cpp
 BasedOnStyle: Google
@@ -96,7 +91,7 @@ def format_code(code: str) -> str:
 		print(f"Error during formatting: {e}", file=sys.stderr)
 		sys.exit(1)
 		
-	
+
 def add_structure_comments(code: str) -> str:
 	"""
 	Add structure comments focusing only on selected block types, handling if-else chains.
@@ -107,146 +102,125 @@ def add_structure_comments(code: str) -> str:
 	"""
 	lines = code.split('\n')
 	result = lines.copy()
-	#function_regex = re.compile(r'^\s*(?!(?:if|for|while|else)\b)[\w\s\*\&\:\<\>\~]+\w+\s*\([^;{]*\)\s*$')
 	function_regex = re.compile(r'^\s*(?!(?:if|for|while|else|switch)\b)[\w\s\*\&\:\<\>\~]+\w+\s*\([^;{]*\)\s*$')
 	blocks: List[Tuple[str, int, Optional[int], Optional[int]]] = []
 	brace_stack: List[Tuple[int, int, Optional[int]]] = []
 	tagged_lines: Set[int] = set()
+	
+	# First pass - detect blocks and track braces
 	for i, line in enumerate(lines):
 		stripped = line.strip()
 		if not stripped or stripped.startswith('//'):
-		
 			continue
 			
 		indent = len(line) - len(line.lstrip())
-		if re.match(r'^\s*if\s*\(', stripped):
 		
+		# More precise detection of control structures
+		if re.search(r'^\s*if\s*\(', line):
 			blocks.append(('if', i, None, None))
-		elif re.match(r'^\s*for\s*\(', stripped):
+		elif re.search(r'^\s*for\s*\(', line):
 			blocks.append(('for', i, None, None))
-		elif re.match(r'^\s*while\s*\(', stripped):
+		elif re.search(r'^\s*while\s*\(', line):
 			blocks.append(('while', i, None, None))
-		elif re.match(r'^\s*switch\s*\(', stripped):
+		elif re.search(r'^\s*switch\s*\(', line):
 			blocks.append(('switch', i, None, None))
-		elif function_regex.match(stripped):
-			blocks.append(('function', i, None, None))			
+		elif function_regex.match(line):
+			blocks.append(('function', i, None, None))
 			
-			
-			
+		# Track opening braces
 		if '{' in stripped:
-		
-			if blocks and blocks[-1][1] in (i, i - 1) and blocks[-1][2] is None:
-			
-				btype, sline, _, eline = blocks[-1]
-				blocks[-1] = (btype, sline, i, eline)
-				bidx = len(blocks) - 1
+			# Check if this opening brace belongs to a control structure
+			# Look at recent blocks that don't have an opening brace assigned yet
+			potential_owners = [(idx, block) for idx, block in enumerate(blocks) 
+							  if block[2] is None and block[1] <= i and i - block[1] <= 2]
+							  
+			if potential_owners:
+				# Associate this brace with the most recent matching block
+				bidx = potential_owners[-1][0]
+				btype, sline, _, eline = blocks[bidx]
+				blocks[bidx] = (btype, sline, i, eline)
 			else:
 				bidx = None
 				
 			brace_stack.append((i, indent, bidx))
 			
+		# Track closing braces
 		if '}' in stripped:
-		
 			if brace_stack:
-			
 				_, _, bidx = brace_stack.pop()
 				if bidx is not None:
-				
 					btype, sline, ob, _ = blocks[bidx]
 					blocks[bidx] = (btype, sline, ob, i)
-					
-				
-			
-		
 	
+	# Process if-else chains
 	updated = []
 	for btype, sline, ob, eline in blocks:
 		if btype == 'if' and eline is not None:
-		
 			chain_end = eline
 			j = eline + 1
 			while j < len(lines):
 				st = lines[j].strip()
 				if not st or st.startswith('//'):
-				
 					j += 1
 					continue
 					
 				if st.startswith('else'):
-				
 					# locate '{'
 					if '{' in st:
-					
 						open_j = j
 					else:
 						k = j + 1
 						while k < len(lines) and '{' not in lines[k]:
 							k += 1
 							
-						
 						open_j = k
 						
 					count = 0
 					for ch in lines[open_j]:
 						if ch == '{':
-						
 							count += 1
 							
 						if ch == '}':
-						
 							count -= 1
-							
-						
 					
 					m = open_j + 1
 					while m < len(lines) and count > 0:
 						for ch in lines[m]:
 							if ch == '{':
-							
 								count += 1
 								
 							if ch == '}':
-							
 								count -= 1
-								
-							
 						
 						m += 1
-						
 					
 					chain_end = m - 1
 					j = chain_end + 1
 					continue
 					
 				break
-				
 			
 			updated.append((btype, sline, ob, chain_end))
 		else:
 			updated.append((btype, sline, ob, eline))
-			
-		
 	
 	blocks = updated
+	
+	# Apply structure comments
 	for btype, sline, ob, eline in blocks:
 		if btype in STRUCTURE_TAGS and sline is not None and eline is not None:
-		
 			start_tag, end_tag = STRUCTURE_TAGS[btype]
 			if sline not in tagged_lines and '//' not in result[sline]:
-			
 				result[sline] = f"{result[sline]} //{start_tag}"
 				tagged_lines.add(sline)
 				
 			if eline not in tagged_lines and '//' not in result[eline]:
-			
 				result[eline] = f"{result[eline]} //{end_tag}"
 				tagged_lines.add(eline)
-				
-			
-		
 	
 	return '\n'.join(result)
-	
+
+
 def process_file(input_file: str, output_file: str = None, skip_format: bool = False) -> None:
 	try:
 	
@@ -266,65 +240,76 @@ def process_file(input_file: str, output_file: str = None, skip_format: bool = F
 		
 	return final
 	
-###  // ----- DO NOT MODIFY CODE BELOW -----//
+
+############################################ HUMAN ONLY CAN MODIFY BELOW 
+
 VFCSEPERATOR = ';//'
 Begins = [
-"beginfunc",
-"beginmethod",
-"beginclass",
-"beginif",
-"begintry",
-"beginwith",
-"beginwhile",
-"beginfor",
-]
+	"beginfunc",
+	"beginmethod",
+	"beginclass",
+	"beginif",
+	"begintry",
+	"beginswitch",
+	"beginwith",
+	"beginwhile",
+	"beginfor",
+	]
 Ends = [
-"endfunc",
-"endmethod",
-"endclass",
-"endif",
-"endtry",
-"endwith",
-"endfor",
-"endwhile",
-]
+	"endfunc",
+	"endmethod",
+	"endclass",
+	"endif",
+	"endtry",
+	"endswitch",
+	"endwith",
+	"endfor",
+	"endwhile",
+	]
 begin_type = {
-"beginfunc": "input",
-"beginmethod": "input",
-"beginclass": "input",
-"beginif": "branch",
-"begintry": "branch",
-"beginwith": "branch",
-"beginwhile": "loop",
-"beginfor": "loop",
-}
+	"beginfunc": "input",
+	"beginmethod": "input",
+	"beginclass": "input",
+	"beginif": "branch",
+	"begintry": "branch",
+	"beginswitch": "branch",
+	"beginwith": "branch",
+	"beginwhile": "loop",
+	"beginfor": "loop",
+	}
 end_type = {
-"endfunc": "end",
-"endmethod": "end",
-"endclass": "end",
-"endif": "bend",
-"endtry": "bend",
-"endwith": "bend",
-"endfor": "lend",
-"endwhile": "lend",
-}
+	"endfunc": "end",
+	"endmethod": "end",
+	"endclass": "end",
+	"endif": "bend",
+	"endtry": "bend",
+	"endswitch": "bend",
+	"endwith": "bend",
+	"endfor": "lend",
+	"endwhile": "lend",
+	}
 paths = [
-"else if",
-"else",
-"except",
-"finally",
-]
+	"else if",
+	"else",
+	"case",
+	"except",
+	"finally",
+	]
 ends = [
-"return",
-"continue",
-]
+	"return",
+	"continue",
+	"break",
+	]
 events = [
-"#include",
-]
+	"#include",
+	"delay",
+	]
 outputs = [
-"Serial",
-".write",
-]
+	"Serial",
+	"write",
+	]
+	
+
 def is_path(line: str) -> bool:
 	"""
 	"""
@@ -430,13 +415,11 @@ def generate_VFC(input_string):
 		code = code.strip()
 		type = get_VFC_type(code, comment)
 		marker = get_marker( comment )
-		
 		if marker == "endclass" :
 		
 			VFC += f"bend(){VFCSEPERATOR}\n"
 			
 		VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n'
-		
 		if type == "branch":
 		
 			VFC += f"path(){VFCSEPERATOR}\n"
@@ -455,10 +438,10 @@ def  footer( exportname  ):
 	ENVTOK = 'INSECTA'
 	foot = f';{ENVTOK} EMBEDDED SESSION INFORMATION\n'
 	foot+='; 255 16777215 65280 16777088 16711680 32896 8421504 0 255 255 16777215 4227327 2960640\n'
-	foot+= f';    { os.path.basename(exportname) } // \n'
+	foot+= f';	{ os.path.basename(exportname) } // \n'
 	foot+='; notepad.exe\n'
 	foot+=f';{ENVTOK} EMBEDDED ALTSESSION INFORMATION\n'
-	foot+='; 880 168 766 1516 0 110   392   31    ino.key  0\n'
+	foot+='; 880 168 766 1516 0 110   392   31	ino.key  0\n'
 	return foot
 	
 def __fix_VFC_paths( input_string ):
@@ -532,11 +515,11 @@ def main():
 		VFC_output.write( footer( args.input_file ) )
 		
 	
-###  // ----- DO NOT MODIFY CODE ABOVE -----//
+
 if __name__ == '__main__':
 
 	main()
 	
 
-#  Export  Date: 11:42:56 AM - 23:Apr:2025.
+#  Export  Date: 12:09:11 PM - 23:Apr:2025.
 

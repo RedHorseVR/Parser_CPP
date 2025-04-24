@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : inoCommentParser.py.vfc
-;  File Date : 12:09:11 PM - 23:Apr:2025
+;  File Date : 11:38:29 PM - 23:Apr:2025
 
 set(""");//
 set(Complete Arduino Structure Comment Parser);// 
@@ -111,11 +111,11 @@ set(Code with added structure comments);//
 set(""");//
 set(lines = code.split('\n'));// 
 set(result = lines.copy());// 
-set(#function_regex = re.compile(r'^\s*(?!(?:if|for|while|else)\b)[\w\s\*\&\:\<\>\~]+\w+\s*\([^;{]*\)\s*$'));// function_regex = re.compile(r0)
 set(function_regex = re.compile(r'^\s*(?!(?:if|for|while|else|switch)\b)[\w\s\*\&\:\<\>\~]+\w+\s*\([^;{]*\)\s*$'));// 
 set(blocks: List[Tuple[str, int, Optional[int], Optional[int]]] = []);// 
 set(brace_stack: List[Tuple[int, int, Optional[int]]] = []);// 
 set(tagged_lines: Set[int] = set());// 
+set();//  First pass - detect blocks and track braces
 loop(for i, line in enumerate(lines):);// beginfor
 set(stripped = line.strip());// 
 branch(if not stripped or stripped.startswith('//'):);// beginif
@@ -123,34 +123,42 @@ path();//
 set(continue);// 
 bend();// endif
 set(indent = len(line) - len(line.lstrip()));// 
-branch(if re.match(r'^\s*if\s*\(', stripped):);// beginif
+set();//  More precise detection of control structures
+branch(if re.search(r'^\s*if\s*\(', line):);// beginif
 path();//
 set(blocks.append(('if', i, None, None)));// 
-path(elif re.match(r'^\s*for\s*\(', stripped):);// beginelif
+path(elif re.search(r'^\s*for\s*\(', line):);// beginelif
 set(blocks.append(('for', i, None, None)));// 
-path(elif re.match(r'^\s*while\s*\(', stripped):);// beginelif
+path(elif re.search(r'^\s*while\s*\(', line):);// beginelif
 set(blocks.append(('while', i, None, None)));// 
-path(elif re.match(r'^\s*switch\s*\(', stripped):);// beginelif
+path(elif re.search(r'^\s*switch\s*\(', line):);// beginelif
 set(blocks.append(('switch', i, None, None)));// 
-path(elif function_regex.match(stripped):);// beginelif
+path(elif function_regex.match(line):);// beginelif
 set(blocks.append(('function', i, None, None)));// 
 set();// endlif
 set();// endlif
 set();// endlif
 set();// endlif
 bend();// endif
+set();//  Track opening braces
 branch(if '{' in stripped:);// beginif
 path();//
-branch(if blocks and blocks[-1][1] in (i, i - 1) and blocks[-1][2] is None:);// beginif
+set();//  Check if this opening brace belongs to a control structure
+set();//  Look at recent blocks that don't have an opening brace assigned yet
+set(potential_owners = [(idx, block) for idx, block in enumerate(blocks));// 
+set(if block[2] is None and block[1] <= i and i - block[1] <= 2]);// 
+branch(if potential_owners:);// beginif
 path();//
-set(btype, sline, _, eline = blocks[-1]);// 
-set(blocks[-1] = (btype, sline, i, eline));// 
-set(bidx = len(blocks) - 1);// 
+set();//  Associate this brace with the most recent matching block
+set(bidx = potential_owners[-1][0]);// 
+set(btype, sline, _, eline = blocks[bidx]);// 
+set(blocks[bidx] = (btype, sline, i, eline));// 
 path(else:);// 
 set(bidx = None);// 
 bend();// endif
 set(brace_stack.append((i, indent, bidx)));// 
 bend();// endif
+set();//  Track closing braces
 branch(if '}' in stripped:);// beginif
 path();//
 branch(if brace_stack:);// beginif
@@ -164,6 +172,7 @@ bend();// endif
 bend();// endif
 bend();// endif
 lend();// endfor
+set();//  Process if-else chains
 set(updated = []);// 
 loop(for btype, sline, ob, eline in blocks:);// beginfor
 branch(if btype == 'if' and eline is not None:);// beginif
@@ -227,6 +236,7 @@ set(updated.append((btype, sline, ob, eline)));//
 bend();// endif
 lend();// endfor
 set(blocks = updated);// 
+set();//  Apply structure comments
 loop(for btype, sline, ob, eline in blocks:);// beginfor
 branch(if btype in STRUCTURE_TAGS and sline is not None and eline is not None:);// beginif
 path();//
@@ -265,10 +275,9 @@ set(sys.exit(1));//
 bend();// endtry
 set(return final);// 
 end();// endfunc
-set();// ##  // ----- DO NOT MODIFY CODE BELOW -----//
+set(############################################ HUMAN ONLY CAN MODIFY BELOW);// ########################################### HUMAN ONLY CAN MODIFY BELOW 
 set(VFCSEPERATOR = ';//');// 
-branch();//
-path(Begins = [);//// //
+set(Begins = [);// 
 set("beginfunc",);// 
 set("beginmethod",);// 
 set("beginclass",);// 
@@ -279,7 +288,7 @@ set("beginwith",);//
 set("beginwhile",);// 
 set("beginfor",);// 
 set(]);// 
-path(Ends = [);//// //
+set(Ends = [);// 
 set("endfunc",);// 
 set("endmethod",);// 
 set("endclass",);// 
@@ -290,7 +299,7 @@ set("endwith",);//
 set("endfor",);// 
 set("endwhile",);// 
 set(]);// 
-path(begin_type = {);//// //
+set(begin_type = {);// 
 set("beginfunc": "input",);// 
 set("beginmethod": "input",);// 
 set("beginclass": "input",);// 
@@ -301,7 +310,7 @@ set("beginwith": "branch",);//
 set("beginwhile": "loop",);// 
 set("beginfor": "loop",);// 
 set(});// 
-path(end_type = {);//// //
+set(end_type = {);// 
 set("endfunc": "end",);// 
 set("endmethod": "end",);// 
 set("endclass": "end",);// 
@@ -312,28 +321,26 @@ set("endwith": "bend",);//
 set("endfor": "lend",);// 
 set("endwhile": "lend",);// 
 set(});// 
-path(paths = [);//// //
+set(paths = [);// 
 set("else if",);// 
 set("else",);// 
 set("case",);// 
 set("except",);// 
 set("finally",);// 
 set(]);// 
-path(ends = [);//// //
+set(ends = [);// 
 set("return",);// 
 set("continue",);// 
 set("break",);// 
 set(]);// 
-path(events = [);//// //
+set(events = [);// 
 set("#include",);// 
 set("delay",);// 
 set(]);// 
-path(outputs = [);//// //
+set(outputs = [);// 
 set("Serial",);// 
 set("write",);// 
 set(]);// 
-bend();//
-end();//
 
 input(def is_path(line: str) -> bool:);// beginfunc
 set(""");//
@@ -470,10 +477,10 @@ input(def  footer( exportname  ):);// beginfunc
 set(ENVTOK = 'INSECTA');// 
 set(foot = f';{ENVTOK} EMBEDDED SESSION INFORMATION\n');// 
 set(foot+='; 255 16777215 65280 16777088 16711680 32896 8421504 0 255 255 16777215 4227327 2960640\n');// 
-set(foot+= f';    { os.path.basename(exportname) } // \n');// 
+set(foot+= f'; { os.path.basename(exportname) } // \n');// 
 set(foot+='; notepad.exe\n');// 
 set(foot+=f';{ENVTOK} EMBEDDED ALTSESSION INFORMATION\n');// 
-set(foot+='; 880 168 766 1516 0 110   392   31    ino.key  0\n');// 
+set(foot+='; 880 168 766 1516 0 110   392   31 ino.key  0\n');// 
 set(return foot);// 
 end();// endfunc
 
@@ -548,12 +555,11 @@ set(VFC_output.write(VFC));//
 set(VFC_output.write( footer( args.input_file ) ));// 
 bend();// endwith
 end();// endfunc
-set();// ##  // ----- DO NOT MODIFY CODE ABOVE -----//
 branch(if __name__ == '__main__':);// beginif
 path();//
 set(main());// 
 bend();// endif
-set();//   Export  Date: 11:42:56 AM - 23:Apr:2025.
+set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 
 
 
@@ -562,4 +568,4 @@ set();//   Export  Date: 11:42:56 AM - 23:Apr:2025.
 ;    inoCommentParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 1381 239 1423 1882 0 190   4294966649   4294954333    python.key  0
+; 1134 265 1065 1671 0 30   460   4294966402    python.key  0
