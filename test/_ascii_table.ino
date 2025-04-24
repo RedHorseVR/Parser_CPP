@@ -45,16 +45,35 @@ void loop() //beginfunc
 
     Serial.println(thisByte, BIN);
     // if printed last visible character '~' or 126, stop:
-    if (thisByte == 126)
+    if (thisByte == 126) //beginif
 
     { // you could also use if (thisByte == '~') {
 
         while (true) //beginwhile
         {
+            int sensorReading = analogRead(A0);
+            // map the sensor range to a range of four options:
+            int range = map(sensorReading, sensorMin, sensorMax, 0, 3);
+
+            // do something different depending on the range value:
+            switch (range) //beginswitch
+            {
+                case 0: // your hand is on the sensor
+                    Serial.println("dark");
+                    break;
+                case 1: // your hand is close to the sensor
+                    Serial.println("dim");
+                    break;
+                case 2: // your hand is a few inches from the sensor
+                    Serial.println("medium");
+                    break;
+                case 3: // your hand is nowhere near the sensor
+                    Serial.println("bright");
+                    break;
+            } //endswitch
             continue;
         } //endwhile
-    }
-
+    } //endif
     thisByte++;
 } //endfunc
 //  Export  Date: 10:48:54 AM - 23:Apr:2025;

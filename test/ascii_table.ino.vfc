@@ -1,3 +1,9 @@
+;  IRL FlowCode Version: Version 10.0
+;  c1995-2015: Visual Flow Coder by 2LResearch
+;
+;  File Name : ascii_table.ino.vfc
+;  File Date : 11:24:16 PM - 23:Apr:2025
+
 set(/*);// 
 set(ASCII table);// 
 set(Prints out byte values in all possible formats:);// 
@@ -12,6 +18,7 @@ set(by Tom Igoe);//
 set(This example code is in the public domain.);// 
 set(https:);// 
 set(*/);// 
+
 input(void setup());// beginfunc
 set({);// 
 output(Serial.begin(9600););// 
@@ -25,6 +32,7 @@ set(// first visible ASCIIcharacter '!' is number 33:);//  first visible ASCIIch
 set(int thisByte = 33;);// 
 set(// for example, '!' is the same as 33, so you could also use this:);//  for example, 0 is the same as 33, so you could also use this:
 set(// int thisByte = '!';);//  int thisByte = 0;
+
 input(void loop());// beginfunc
 set({);// 
 set(// will show up as '!');//  will show up as 0
@@ -38,20 +46,42 @@ output(Serial.print(thisByte, OCT););//
 output(Serial.print(", bin: "););// 
 output(Serial.println(thisByte, BIN););// 
 set(// if printed last visible character '~' or 126, stop:);//  if printed last visible character 0 or 126, stop:
-set(if (thisByte == 126));// 
+branch(if (thisByte == 126));// beginif
+path();//
 set({ // you could also use if (thisByte == '~') {);//  you could also use if (thisByte == 0) {
 loop(while (true));// beginwhile
 set({);// 
+set(int sensorReading = analogRead(A0););// 
+set();//  map the sensor range to a range of four options:
+set(int range = map(sensorReading, sensorMin, sensorMax, 0, 3););// 
+set();//  do something different depending on the range value:
+branch(switch (range));// beginswitch
+path({);//
+path(case 0:);//  your hand is on the sensor
+output(Serial.println("dark"););// 
+end(break;);// 
+path(case 1:);//  your hand is close to the sensor
+output(Serial.println("dim"););// 
+end(break;);// 
+path(case 2:);//  your hand is a few inches from the sensor
+output(Serial.println("medium"););// 
+end(break;);// 
+path(case 3:);//  your hand is nowhere near the sensor
+output(Serial.println("bright"););// 
+end(break;);// 
+bend(});// endswitch
 end(continue;);// 
 lend(});// endwhile
-set(});// 
+bend(});// endif
 set(thisByte++;);// 
 end(});// endfunc
 set();//   Export  Date: 10:48:54 AM - 23:Apr:2025;
 
+
+
 ;INSECTA EMBEDDED SESSION INFORMATION
 ; 255 16777215 65280 16777088 16711680 32896 8421504 0 255 255 16777215 4227327 2960640
-;    ascii_table.ino // 
+;    ascii_table.ino   //   ;
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 880 168 766 1516 0 110   392   31    ino.key  0
+; 134 165 1503 1289 0 110   484   4294966238    ino.key  0

@@ -92,7 +92,7 @@ def format_code(code: str) -> str:
 		sys.exit(1)
 		
 	
-def add_structure_comments(code: str) -> str:
+def ___add_structure_comments(code: str) -> str:
 	"""
 	Add structure comments focusing only on selected block types, handling if-else chains.
 	Args:
@@ -244,6 +244,136 @@ def add_structure_comments(code: str) -> str:
 	
 	return '\n'.join(result)
 	
+
+def add_structure_comments(code: str) -> str:
+	"""
+	Add structure comments focusing only on selected block types, handling if-else chains.
+	Args:
+	code: The formatted code
+	Returns:
+	Code with added structure comments
+	"""
+	lines = code.split('\n')
+	result = lines.copy()
+	function_regex = re.compile(r'^\s*(?!(?:if|for|while|else|switch)\b)[\w\s\*\&\:\<\>\~]+\w+\s*\([^;{]*\)\s*$')
+	blocks: List[Tuple[str, int, Optional[int], Optional[int]]] = []
+	brace_stack: List[Tuple[int, int, Optional[int]]] = []
+	tagged_lines: Set[int] = set()
+	
+	# First pass - detect blocks and track braces
+	for i, line in enumerate(lines):
+		stripped = line.strip()
+		if not stripped or stripped.startswith('//'):
+			continue
+			
+		indent = len(line) - len(line.lstrip())
+		
+		# More precise detection of control structures
+		if re.search(r'^\s*if\s*\(', line):
+			blocks.append(('if', i, None, None))
+		elif re.search(r'^\s*for\s*\(', line):
+			blocks.append(('for', i, None, None))
+		elif re.search(r'^\s*while\s*\(', line):
+			blocks.append(('while', i, None, None))
+		elif re.search(r'^\s*switch\s*\(', line):
+			blocks.append(('switch', i, None, None))
+		elif function_regex.match(line):
+			blocks.append(('function', i, None, None))
+			
+		# Track opening braces
+		if '{' in stripped:
+			# Check if this opening brace belongs to a control structure
+			# Look at recent blocks that don't have an opening brace assigned yet
+			potential_owners = [(idx, block) for idx, block in enumerate(blocks) 
+							  if block[2] is None and block[1] <= i and i - block[1] <= 2]
+							  
+			if potential_owners:
+				# Associate this brace with the most recent matching block
+				bidx = potential_owners[-1][0]
+				btype, sline, _, eline = blocks[bidx]
+				blocks[bidx] = (btype, sline, i, eline)
+			else:
+				bidx = None
+				
+			brace_stack.append((i, indent, bidx))
+			
+		# Track closing braces
+		if '}' in stripped:
+			if brace_stack:
+				_, _, bidx = brace_stack.pop()
+				if bidx is not None:
+					btype, sline, ob, _ = blocks[bidx]
+					blocks[bidx] = (btype, sline, ob, i)
+	
+	# Process if-else chains
+	updated = []
+	for btype, sline, ob, eline in blocks:
+		if btype == 'if' and eline is not None:
+			chain_end = eline
+			j = eline + 1
+			while j < len(lines):
+				st = lines[j].strip()
+				if not st or st.startswith('//'):
+					j += 1
+					continue
+					
+				if st.startswith('else'):
+					# locate '{'
+					if '{' in st:
+						open_j = j
+					else:
+						k = j + 1
+						while k < len(lines) and '{' not in lines[k]:
+							k += 1
+							
+						open_j = k
+						
+					count = 0
+					for ch in lines[open_j]:
+						if ch == '{':
+							count += 1
+							
+						if ch == '}':
+							count -= 1
+					
+					m = open_j + 1
+					while m < len(lines) and count > 0:
+						for ch in lines[m]:
+							if ch == '{':
+								count += 1
+								
+							if ch == '}':
+								count -= 1
+						
+						m += 1
+					
+					chain_end = m - 1
+					j = chain_end + 1
+					continue
+					
+				break
+			
+			updated.append((btype, sline, ob, chain_end))
+		else:
+			updated.append((btype, sline, ob, eline))
+	
+	blocks = updated
+	
+	# Apply structure comments
+	for btype, sline, ob, eline in blocks:
+		if btype in STRUCTURE_TAGS and sline is not None and eline is not None:
+			start_tag, end_tag = STRUCTURE_TAGS[btype]
+			if sline not in tagged_lines and '//' not in result[sline]:
+				result[sline] = f"{result[sline]} //{start_tag}"
+				tagged_lines.add(sline)
+				
+			if eline not in tagged_lines and '//' not in result[eline]:
+				result[eline] = f"{result[eline]} //{end_tag}"
+				tagged_lines.add(eline)
+	
+	return '\n'.join(result)
+
+
 def process_file(input_file: str, output_file: str = None, skip_format: bool = False) -> None:
 	try:
 	
@@ -263,6 +393,8 @@ def process_file(input_file: str, output_file: str = None, skip_format: bool = F
 		
 	return final
 	
+
+############################################ HUMAN ONLY CAN MODIFY BELOW 
 
 VFCSEPERATOR = ';//'
 Begins = [
@@ -459,10 +591,10 @@ def  footer( exportname  ):
 	ENVTOK = 'INSECTA'
 	foot = f';{ENVTOK} EMBEDDED SESSION INFORMATION\n'
 	foot+='; 255 16777215 65280 16777088 16711680 32896 8421504 0 255 255 16777215 4227327 2960640\n'
-	foot+= f';    { os.path.basename(exportname) } // \n'
+	foot+= f';	{ os.path.basename(exportname) } // \n'
 	foot+='; notepad.exe\n'
 	foot+=f';{ENVTOK} EMBEDDED ALTSESSION INFORMATION\n'
-	foot+='; 880 168 766 1516 0 110   392   31    ino.key  0\n'
+	foot+='; 880 168 766 1516 0 110   392   31	ino.key  0\n'
 	return foot
 	
 def __fix_VFC_paths( input_string ):
