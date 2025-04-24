@@ -12,8 +12,6 @@ by Tom Igoe
 This example code is in the public domain.
 https:
 */
-
-
 const int sensorMin = 0;
 const int sensorMax = 600;
 void setup()
@@ -73,5 +71,5 @@ void loop()
 	thisByte++;
 	}
 
-//  Export  Date: 11:35:29 PM - 23:Apr:2025;
+//  Export  Date: 06:53:33 PM - 24:Apr:2025;
 
