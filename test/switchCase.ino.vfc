@@ -1,3 +1,9 @@
+;  IRL FlowCode Version: Version 10.0
+;  c1995-2015: Visual Flow Coder by 2LResearch
+;
+;  File Name : switchCase.ino.vfc
+;  File Date : 12:11:31 PM - 23:Apr:2025
+
 set(/*);// 
 set(Switch statement);// 
 set(Demonstrates the use of a switch statement. The switch statement allows you);// 
@@ -18,11 +24,13 @@ set();//  these constants won't change. They are the lowest and highest readings
 set();//  get from your sensor:
 set(const int sensorMin = 0;);//  sensor minimum, discovered through experiment
 set(const int sensorMax = 600;);//  sensor maximum, discovered through experiment
+
 input(void setup());// beginfunc
 set({);// 
 set();//  initialize serial communication:
 output(Serial.begin(9600););// 
 end(});// endfunc
+
 input(void loop());// beginfunc
 set({);// 
 set();//  read the sensor:
@@ -48,9 +56,11 @@ bend(});// endswitch
 set(delay(1););//  delay in between reads for stability
 end(});// endfunc
 
+
+
 ;INSECTA EMBEDDED SESSION INFORMATION
 ; 255 16777215 65280 16777088 16711680 32896 8421504 0 255 255 16777215 4227327 2960640
-;    switchCase.ino // 
+;    switchCase.ino   //   ;
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 880 168 766 1516 0 110   392   31    ino.key  0
+; 1335 249 1362 1404 0 80   389   170    ino.key  0
