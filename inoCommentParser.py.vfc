@@ -1,0 +1,571 @@
+;  IRL FlowCode Version: Version 10.0
+;  c1995-2015: Visual Flow Coder by 2LResearch
+;
+;  File Name : inoCommentParser.py.vfc
+;  File Date : 11:38:29 PM - 23:Apr:2025
+
+set(""");//
+set(Complete Arduino Structure Comment Parser);// 
+set(A two-phase parser that:);// 
+set(1) Formats Arduino code using clang-format (plus indents else-if blocks));// 
+set(2) Adds structure comments with focus on functions and control structures, correctly handling if-else chains);// 
+set(Usage: ./arduino_parser.py input.ino -o output.ino);// 
+set(""");//
+event(import subprocess);// 
+event(import sys);// 
+event(import os);// 
+event(import argparse);// 
+event(import tempfile);// 
+event(import re);// 
+event(from typing import List, Tuple, Optional, Set);// 
+set(STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),);// 
+set("for":     ("beginfor",    "endfor"),);// 
+set("while":   ("beginwhile",  "endwhile"),);// 
+set("switch":  ("beginswitch","endswitch"),);// 
+set("function":("beginfunc",   "endfunc")});// 
+set(config = """);// 
+set(Language: Cpp);// 
+set(BasedOnStyle: Google);// 
+set(IndentWidth: 4);// 
+set(AccessModifierOffset: -4);// 
+set(AllowShortIfStatementsOnASingleLine: false);// 
+set(AllowShortLoopsOnASingleLine: false);// 
+set(AllowShortFunctionsOnASingleLine: None);// 
+set(BreakBeforeBraces: Allman);// 
+set(ColumnLimit: 100);// 
+set(PointerAlignment: Left);// 
+set(SortIncludes: false);// 
+set(ReflowComments: false);// 
+set(UseTab: Never);// 
+set(SpacesBeforeTrailingComments: 1);// 
+set(""");//
+
+input(def create_clang_config():);// beginfunc
+set("""Create a temporary clang-format configuration file for Arduino code.""");//
+set(fd, path = tempfile.mkstemp(prefix='.clang-format-', text=True));// 
+branch(with os.fdopen(fd, 'w') as f:);// beginwith
+path();//
+set(f.write(config));// 
+bend();// endwith
+set(return path);// 
+end();// endfunc
+
+input(def indent_else_blocks(code: str) -> str:);// beginfunc
+set(""");//
+set(After formatting, indent 'else'/'else if' lines one level deeper);// 
+set(under the preceding block's closing brace.);// 
+set(""");//
+set(lines = code.split('\n'));// 
+set(new_lines = []);// 
+loop(for line in lines:);// beginfor
+set(stripped = line.lstrip());// 
+branch(if stripped.startswith('else') and new_lines:);// beginif
+path();//
+set(prev = new_lines[-1]);// 
+set(prev_indent = len(prev) - len(prev.lstrip()));// 
+set(new_indent = prev_indent + 4);// 
+set(new_lines.append(' ' * new_indent + stripped));// 
+path(else:);// 
+set(new_lines.append(line));// 
+bend();// endif
+lend();// endfor
+set(return '\n'.join(new_lines));// 
+end();// endfunc
+
+input(def format_code(code: str) -> str:);// beginfunc
+set(""");//
+set(Format Arduino code using clang-format, then indent else-if blocks.);// 
+set(Args:);// 
+set(code: The original code);// 
+set(Returns:);// 
+set(Formatted code with else-if indented);// 
+set(""");//
+branch(try:);// begintry
+path();//
+set(config_path = create_clang_config());// 
+branch(try:);// begintry
+path();//
+set(subprocess.run(['clang-format', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True));// 
+path(except (subprocess.SubprocessError, FileNotFoundError):);// 
+set(print("Error: clang-format not found. Please install clang-format.", file=sys.stderr));// 
+set(os.unlink(config_path));// 
+set(sys.exit(1));// 
+bend();// endtry
+set(proc = subprocess.run(['clang-format', f'-style=file:{config_path}'], input=code.encode('utf-8'), stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True));// 
+set(formatted = proc.stdout.decode('utf-8'));// 
+set(os.unlink(config_path));// 
+set(return indent_else_blocks(formatted));// 
+path(except Exception as e:);// 
+set(print(f"Error during formatting: {e}", file=sys.stderr));// 
+set(sys.exit(1));// 
+bend();// endtry
+end();// endfunc
+
+input(def add_structure_comments(code: str) -> str:);// beginfunc
+set(""");//
+set(Add structure comments focusing only on selected block types, handling if-else chains.);// 
+set(Args:);// 
+set(code: The formatted code);// 
+set(Returns:);// 
+set(Code with added structure comments);// 
+set(""");//
+set(lines = code.split('\n'));// 
+set(result = lines.copy());// 
+set(function_regex = re.compile(r'^\s*(?!(?:if|for|while|else|switch)\b)[\w\s\*\&\:\<\>\~]+\w+\s*\([^;{]*\)\s*$'));// 
+set(blocks: List[Tuple[str, int, Optional[int], Optional[int]]] = []);// 
+set(brace_stack: List[Tuple[int, int, Optional[int]]] = []);// 
+set(tagged_lines: Set[int] = set());// 
+set();//  First pass - detect blocks and track braces
+loop(for i, line in enumerate(lines):);// beginfor
+set(stripped = line.strip());// 
+branch(if not stripped or stripped.startswith('//'):);// beginif
+path();//
+set(continue);// 
+bend();// endif
+set(indent = len(line) - len(line.lstrip()));// 
+set();//  More precise detection of control structures
+branch(if re.search(r'^\s*if\s*\(', line):);// beginif
+path();//
+set(blocks.append(('if', i, None, None)));// 
+path(elif re.search(r'^\s*for\s*\(', line):);// beginelif
+set(blocks.append(('for', i, None, None)));// 
+path(elif re.search(r'^\s*while\s*\(', line):);// beginelif
+set(blocks.append(('while', i, None, None)));// 
+path(elif re.search(r'^\s*switch\s*\(', line):);// beginelif
+set(blocks.append(('switch', i, None, None)));// 
+path(elif function_regex.match(line):);// beginelif
+set(blocks.append(('function', i, None, None)));// 
+set();// endlif
+set();// endlif
+set();// endlif
+set();// endlif
+bend();// endif
+set();//  Track opening braces
+branch(if '{' in stripped:);// beginif
+path();//
+set();//  Check if this opening brace belongs to a control structure
+set();//  Look at recent blocks that don't have an opening brace assigned yet
+set(potential_owners = [(idx, block) for idx, block in enumerate(blocks));// 
+set(if block[2] is None and block[1] <= i and i - block[1] <= 2]);// 
+branch(if potential_owners:);// beginif
+path();//
+set();//  Associate this brace with the most recent matching block
+set(bidx = potential_owners[-1][0]);// 
+set(btype, sline, _, eline = blocks[bidx]);// 
+set(blocks[bidx] = (btype, sline, i, eline));// 
+path(else:);// 
+set(bidx = None);// 
+bend();// endif
+set(brace_stack.append((i, indent, bidx)));// 
+bend();// endif
+set();//  Track closing braces
+branch(if '}' in stripped:);// beginif
+path();//
+branch(if brace_stack:);// beginif
+path();//
+set(_, _, bidx = brace_stack.pop());// 
+branch(if bidx is not None:);// beginif
+path();//
+set(btype, sline, ob, _ = blocks[bidx]);// 
+set(blocks[bidx] = (btype, sline, ob, i));// 
+bend();// endif
+bend();// endif
+bend();// endif
+lend();// endfor
+set();//  Process if-else chains
+set(updated = []);// 
+loop(for btype, sline, ob, eline in blocks:);// beginfor
+branch(if btype == 'if' and eline is not None:);// beginif
+path();//
+set(chain_end = eline);// 
+set(j = eline + 1);// 
+loop(while j < len(lines):);// beginwhile
+set(st = lines[j].strip());// 
+branch(if not st or st.startswith('//'):);// beginif
+path();//
+set(j += 1);// 
+set(continue);// 
+bend();// endif
+branch(if st.startswith('else'):);// beginif
+path();//
+set(# locate '{');//  locate 0
+branch(if '{' in st:);// beginif
+path();//
+set(open_j = j);// 
+path(else:);// 
+set(k = j + 1);// 
+loop(while k < len(lines) and '{' not in lines[k]:);// beginwhile
+set(k += 1);// 
+lend();// endwhile
+set(open_j = k);// 
+bend();// endif
+set(count = 0);// 
+loop(for ch in lines[open_j]:);// beginfor
+branch(if ch == '{':);// beginif
+path();//
+set(count += 1);// 
+bend();// endif
+branch(if ch == '}':);// beginif
+path();//
+set(count -= 1);// 
+bend();// endif
+lend();// endfor
+set(m = open_j + 1);// 
+loop(while m < len(lines) and count > 0:);// beginwhile
+loop(for ch in lines[m]:);// beginfor
+branch(if ch == '{':);// beginif
+path();//
+set(count += 1);// 
+bend();// endif
+branch(if ch == '}':);// beginif
+path();//
+set(count -= 1);// 
+bend();// endif
+lend();// endfor
+set(m += 1);// 
+lend();// endwhile
+set(chain_end = m - 1);// 
+set(j = chain_end + 1);// 
+set(continue);// 
+bend();// endif
+set(break);// 
+lend();// endwhile
+set(updated.append((btype, sline, ob, chain_end)));// 
+path(else:);// 
+set(updated.append((btype, sline, ob, eline)));// 
+bend();// endif
+lend();// endfor
+set(blocks = updated);// 
+set();//  Apply structure comments
+loop(for btype, sline, ob, eline in blocks:);// beginfor
+branch(if btype in STRUCTURE_TAGS and sline is not None and eline is not None:);// beginif
+path();//
+set(start_tag, end_tag = STRUCTURE_TAGS[btype]);// 
+branch(if sline not in tagged_lines and '//' not in result[sline]:);// beginif
+path();//
+set(result[sline] = f"{result[sline]} //{start_tag}");// 
+set(tagged_lines.add(sline));// 
+bend();// endif
+branch(if eline not in tagged_lines and '//' not in result[eline]:);// beginif
+path();//
+set(result[eline] = f"{result[eline]} //{end_tag}");// 
+set(tagged_lines.add(eline));// 
+bend();// endif
+bend();// endif
+lend();// endfor
+set(return '\n'.join(result));// 
+end();// endfunc
+
+input(def process_file(input_file: str, output_file: str = None, skip_format: bool = False) -> None:);// beginfunc
+branch(try:);// begintry
+path();//
+set(code = open(input_file).read());// 
+set(formatted = code if skip_format else format_code(code));// 
+set(final = add_structure_comments(formatted));// 
+branch(if output_file:);// beginif
+path();//
+set(open(output_file, 'w').write(final));// 
+set(print(f"Output written to {output_file}"));// 
+path(else:);// 
+set(print(final));// 
+bend();// endif
+path(except Exception as e:);// 
+set(print(f"Error: {e}", file=sys.stderr));// 
+set(sys.exit(1));// 
+bend();// endtry
+set(return final);// 
+end();// endfunc
+set(############################################ HUMAN ONLY CAN MODIFY BELOW);// ########################################### HUMAN ONLY CAN MODIFY BELOW 
+set(VFCSEPERATOR = ';//');// 
+set(Begins = [);// 
+set("beginfunc",);// 
+set("beginmethod",);// 
+set("beginclass",);// 
+set("beginif",);// 
+set("begintry",);// 
+set("beginswitch",);// 
+set("beginwith",);// 
+set("beginwhile",);// 
+set("beginfor",);// 
+set(]);// 
+set(Ends = [);// 
+set("endfunc",);// 
+set("endmethod",);// 
+set("endclass",);// 
+set("endif",);// 
+set("endtry",);// 
+set("endswitch",);// 
+set("endwith",);// 
+set("endfor",);// 
+set("endwhile",);// 
+set(]);// 
+set(begin_type = {);// 
+set("beginfunc": "input",);// 
+set("beginmethod": "input",);// 
+set("beginclass": "input",);// 
+set("beginif": "branch",);// 
+set("begintry": "branch",);// 
+set("beginswitch": "branch",);// 
+set("beginwith": "branch",);// 
+set("beginwhile": "loop",);// 
+set("beginfor": "loop",);// 
+set(});// 
+set(end_type = {);// 
+set("endfunc": "end",);// 
+set("endmethod": "end",);// 
+set("endclass": "end",);// 
+set("endif": "bend",);// 
+set("endtry": "bend",);// 
+set("endswitch": "bend",);// 
+set("endwith": "bend",);// 
+set("endfor": "lend",);// 
+set("endwhile": "lend",);// 
+set(});// 
+set(paths = [);// 
+set("else if",);// 
+set("else",);// 
+set("case",);// 
+set("except",);// 
+set("finally",);// 
+set(]);// 
+set(ends = [);// 
+set("return",);// 
+set("continue",);// 
+set("break",);// 
+set(]);// 
+set(events = [);// 
+set("#include",);// 
+set("delay",);// 
+set(]);// 
+set(outputs = [);// 
+set("Serial",);// 
+set("write",);// 
+set(]);// 
+
+input(def is_path(line: str) -> bool:);// beginfunc
+set(""");//
+set(""");//
+set(parts = line.strip().split(None, 1));// 
+branch(if not parts:);// beginif
+path();//
+set(return False);// 
+bend();// endif
+branch(if parts[0].strip(" :") in paths:);// beginif
+path();//
+set(return True);// 
+bend();// endif
+end();// endfunc
+
+input(def replace_string_literals(input_string):);// beginfunc
+set(result = re.sub(r'(["\'])(.*?)(\1)', '0', input_string));//
+set(return result);// 
+end();// endfunc
+
+input(def split_on_comment(input_string):);// beginfunc
+set(match = re.search(r'(?<!")#.*$', temp_str));//
+branch(if match:);// beginif
+path();//
+set(s1 = input_string.strip());// 
+set(s2 = match.strip());// 
+path(else:);// 
+set(s1, s2 = input_string.strip(), "");// 
+bend();// endif
+set(return (s1, s2));// 
+end();// endfunc
+set(INLINECOMMENT = '//');// 
+
+input(def split_string(input_string):);// beginfunc
+set(temp_str = replace_string_literals(input_string));// 
+set(parts = temp_str.split( INLINECOMMENT , 1));// 
+set(s1 = input_string.strip());// 
+branch(if len(parts) > 1 :);// beginif
+path();//
+set(s2 = parts[1]);// 
+set(s1 = s1.replace( INLINECOMMENT   + s2, ""));// 
+path(else:);// 
+set(s2 = "");// 
+bend();// endif
+set(return (s1, s2));// 
+end();// endfunc
+
+input(def get_marker( comment ):);// beginfunc
+set(parts = comment.strip().split(None, 1));// 
+branch(if not parts:);// beginif
+path();//
+set(return "none");// 
+bend();// endif
+set(marker = parts[0]);// 
+set(return marker);// 
+end();// endfunc
+
+input(def first_token(code):);// beginfunc
+set(tokens = re.split(r'[.;(]+', code.strip()));// 
+set(return tokens[0] if tokens else "none");// 
+end();// endfunc
+
+input(def get_VFC_type(code : str, line: str) -> Optional[str]:);// beginfunc
+set(""");//
+set(If the first word of `line` (without any leading INLINECOMMENT ) is in Begins or Ends,);// 
+set(returns its mapped type; otherwise returns None.);// 
+set(""");//
+set(token = code.strip().split(None, 1)[0] if len(code) > 1 else "none");// 
+branch(if first_token(code) in outputs:);// beginif
+path();//
+set(return "output");// 
+bend();// endif
+branch(if first_token(code) in ends:);// beginif
+path();//
+set(return "end");// 
+bend();// endif
+branch(if token in events:);// beginif
+path();//
+set(return "event");// 
+bend();// endif
+branch(if is_path(code):);// beginif
+path();//
+set(return 'path');// 
+bend();// endif
+set(parts = line.strip().split(None, 1));// 
+branch(if not parts:);// beginif
+path();//
+set(return "set");// 
+bend();// endif
+set(marker = parts[0]);// 
+branch(if marker in Begins:);// beginif
+path();//
+set(return begin_type[marker]);// 
+bend();// endif
+branch(if marker in Ends:);// beginif
+path();//
+set(return end_type[marker]);// 
+bend();// endif
+set(return "set");// 
+end();// endfunc
+
+input(def generate_VFC(input_string):);// beginfunc
+set(strings = input_string.split("\n"));// 
+set(VFC = '');// 
+loop(for string in strings:);// beginfor
+branch(if not string.strip():);// beginif
+path();//
+set(continue);// 
+bend();// endif
+set(code, comment = split_string(string));// 
+set(code = code.strip());// 
+set(type = get_VFC_type(code, comment));// 
+set(marker = get_marker( comment ));// 
+branch(if marker == "endclass" :);// beginif
+path();//
+set(VFC += f"bend(){VFCSEPERATOR}\n");// 
+bend();// endif
+set(VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n');// 
+branch(if type == "branch":);// beginif
+path();//
+set(VFC += f"path(){VFCSEPERATOR}\n");// 
+bend();// endif
+branch(if marker == "beginclass" :);// beginif
+path();//
+set(VFC += f"branch(){VFCSEPERATOR}\n");// 
+set(VFC += f"path(){VFCSEPERATOR}\n");// 
+set(VFC += f"path(){VFCSEPERATOR}\n");// 
+bend();// endif
+lend();// endfor
+set(return VFC);// 
+end();// endfunc
+
+input(def  footer( exportname  ):);// beginfunc
+set(ENVTOK = 'INSECTA');// 
+set(foot = f';{ENVTOK} EMBEDDED SESSION INFORMATION\n');// 
+set(foot+='; 255 16777215 65280 16777088 16711680 32896 8421504 0 255 255 16777215 4227327 2960640\n');// 
+set(foot+= f'; { os.path.basename(exportname) } // \n');// 
+set(foot+='; notepad.exe\n');// 
+set(foot+=f';{ENVTOK} EMBEDDED ALTSESSION INFORMATION\n');// 
+set(foot+='; 880 168 766 1516 0 110   392   31 ino.key  0\n');// 
+set(return foot);// 
+end();// endfunc
+
+input(def __fix_VFC_paths( input_string ):);// beginfunc
+set(strings = input_string.split("\n"));// 
+set(VFC = '');// 
+set(skip_next = 0);// 
+loop(for i  in range( len(strings) ) :);// beginfor
+set(code = strings[i]);// 
+branch(if code.startswith( "branch")  :);// beginif
+path();//
+set(code2 = strings[i+1].strip());// 
+set(code3 = strings[i+2].strip());// 
+branch(if code2.startswith("path()")   and   code3.startswith("set({)"):);// beginif
+path();//
+set(VFC +=code + "\n");// 
+set(VFC += "path({)" + VFCSEPERATOR  + '\n');// 
+set(skip_next = 3);// 
+bend();// endif
+bend();// endif
+branch(if skip_next > 0:);// beginif
+path();//
+set(skip_next -= 1);// 
+set(continue);// 
+bend();// endif
+set(VFC +=code + "\n");// 
+lend();// endfor
+set(return VFC);// 
+end();// endfunc
+
+input(def fix_VFC_paths( input_string ):);// beginfunc
+set(strings = input_string.split("\n"));// 
+set(VFC = '');// 
+set(skip_next = 0);// 
+loop(for i  in range( len(strings) ) :);// beginfor
+set(code = strings[i]);// 
+branch(if code.startswith( "branch")  :);// beginif
+path();//
+set(code2 = strings[i+1].strip());// 
+set(code3 = strings[i+2].strip());// 
+branch(if code2.startswith("path()")   and   code3.startswith("set({)"):);// beginif
+path();//
+set(VFC +=code + "\n");// 
+set(VFC += "path({)" + VFCSEPERATOR  + '\n');// 
+set(skip_next = 3);// 
+bend();// endif
+bend();// endif
+branch(if skip_next > 0:);// beginif
+path();//
+set(skip_next -= 1);// 
+set(continue);// 
+bend();// endif
+set(VFC +=code + "\n");// 
+lend();// endfor
+set(return VFC);// 
+end();// endfunc
+
+input(def main():);// beginfunc
+set(global modified_code);// 
+set(p = argparse.ArgumentParser());// 
+set(p.add_argument('input_file'));// 
+set(p.add_argument('-o', '--output'));// 
+set(p.add_argument('--skip-format', action='store_true'));// 
+set(args = p.parse_args());// 
+set(modified_code  = process_file(args.input_file, args.output, args.skip_format));// 
+set(VFC = generate_VFC(modified_code));// 
+set(VFC = fix_VFC_paths( VFC ));// 
+set(print( modified_code ));// 
+branch(with open(args.input_file+'.vfc', 'w') as VFC_output:);// beginwith
+path();//
+set(VFC_output.write(VFC));// 
+set(VFC_output.write( footer( args.input_file ) ));// 
+bend();// endwith
+end();// endfunc
+branch(if __name__ == '__main__':);// beginif
+path();//
+set(main());// 
+bend();// endif
+set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
+
+
+
+;INSECTA EMBEDDED SESSION INFORMATION
+; 255 16777215 65280 16777088 16711680 13158600 13158600 0 255 255 9895835 6946660 3289650
+;    inoCommentParser.py   #   .
+; notepad.exe
+;INSECTA EMBEDDED ALTSESSION INFORMATION
+; 1134 265 1065 1671 0 30   460   4294966402    python.key  0

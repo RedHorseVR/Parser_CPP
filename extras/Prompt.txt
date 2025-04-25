@@ -1,0 +1,104 @@
+# Arduino Code Structure Parser
+
+## Project Objective
+Create a parser to enhance Arduino code readability by automatically adding structural comments that clearly mark the beginning and end of code blocks.
+
+## Parser Requirements
+1. Parse standard Arduino/C++ code and add comments to mark block structures
+2. Add comments in a way that doesn't interfere with program execution
+3. Reformat code with proper indentation and spacing where needed
+4. Generate only one comment per block begin/end, without skipping any blocks
+5. Handle nested blocks correctly
+
+## Comment Structure
+- Add `//beginX` comments at the start of blocks
+- Add `//endX` comments at the end of blocks
+
+## Block Types to Mark
+```
+Begin markers:              End markers:
+- beginif                   - endif
+- beginfor                  - endfor
+- beginwhile                - endwhile
+- begindo                   - enddo
+- beginswitch               - endswitch
+- begintry                  - endtry
+- beginfunc                 - endfunc
+- beginmethod               - endmethod
+- beginclass                - endclass
+- beginwith                 - endwith
+```
+
+## Formatting Guidelines
+1. For blocks without braces, add line breaks for clarity
+2. For blocks with braces, place begin comment on the same line as opening brace
+3. Insert blank lines where needed for better readability
+4. Maintain proper indentation
+5. Place ending comments at the end of closing braces
+
+## Examples
+
+### Example 1: Simple if statement without braces
+Input:
+```c
+if (a) b = a;
+```
+
+Output:
+```c
+if (a) //beginif
+    b = a;
+//endif
+```
+
+### Example 2: If statement with braces
+Input:
+```c
+if (a) { b=a; }
+```
+
+Output:
+```c
+if (a) { //beginif
+    b = a;
+} //endif
+```
+
+### Example 3: Function definition
+Input:
+```c
+void main(args) {
+    // function body
+}
+```
+
+Output:
+```c
+void main(args) { //beginfunc
+    // function body
+} //endfunc
+```
+
+### Example 4: Switch statement
+Input:
+```c
+switch(item) {
+    case 1:
+        doSomething();
+        break;
+}
+```
+
+Output:
+```c
+switch(item) { //beginswitch
+    case 1:
+        doSomething();
+        break;
+} //endswitch
+```
+
+## Implementation Details
+1. Choose between Python or another appropriate language for implementation
+2. Parser should process input file and generate properly formatted output
+3. Handle edge cases like nested blocks appropriately
