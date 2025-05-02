@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : inoCommentParser.py.vfc
-;  File Date : 11:38:29 PM - 23:Apr:2025
+;  File Date : 06:29:53 PM - 02:May:2025
 
 set(""");//
 set(Complete Arduino Structure Comment Parser);// 
@@ -568,4 +568,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    inoCommentParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 1134 265 1065 1671 0 30   460   4294966402    python.key  0
+; 1006 193 1716 1671 0 60   545   4294962322    python.key  0
