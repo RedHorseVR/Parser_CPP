@@ -1,6 +1,7 @@
 # Arduino_VFC_parser
 A parser to map Arduino code into the VFC tools
-
+# This uses:
+    pip install clang-format
 
 # 🌀 Arduino Parser INO to VFC IDE  
 
