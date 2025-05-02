@@ -2,15 +2,15 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : inoCommentParser.py.vfc
-;  File Date : 06:29:53 PM - 02:May:2025
+;  File Date : 06:36:05 PM - 02:May:2025
 
-set(""");//
-set(Complete Arduino Structure Comment Parser);// 
-set(A two-phase parser that:);// 
-set(1) Formats Arduino code using clang-format (plus indents else-if blocks));// 
-set(2) Adds structure comments with focus on functions and control structures, correctly handling if-else chains);// 
-set(Usage: ./arduino_parser.py input.ino -o output.ino);// 
-set(""");//
+set();//"""
+set( );//Complete Arduino Structure Comment Parser
+set( );//A two-phase parser that:
+set( );//1) Formats Arduino code using clang-format (plus indents else-if blocks)
+set( );//2) Adds structure comments with focus on functions and control structures, correctly handling if-else chains
+set( );//Usage: ./arduino_parser.py input.ino -o output.ino
+set();//"""
 event(import subprocess);// 
 event(import sys);// 
 event(import os);// 
@@ -18,11 +18,15 @@ event(import argparse);//
 event(import tempfile);// 
 event(import re);// 
 event(from typing import List, Tuple, Optional, Set);// 
+end();//
+branch();//
+path();//
 set(STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),);// 
 set("for":     ("beginfor",    "endfor"),);// 
 set("while":   ("beginwhile",  "endwhile"),);// 
 set("switch":  ("beginswitch","endswitch"),);// 
 set("function":("beginfunc",   "endfunc")});// 
+path();//
 set(config = """);// 
 set(Language: Cpp);// 
 set(BasedOnStyle: Google);// 
@@ -39,6 +43,8 @@ set(ReflowComments: false);//
 set(UseTab: Never);// 
 set(SpacesBeforeTrailingComments: 1);// 
 set(""");//
+bend();//
+end();//
 
 input(def create_clang_config():);// beginfunc
 set("""Create a temporary clang-format configuration file for Arduino code.""");//
@@ -277,6 +283,8 @@ set(return final);//
 end();// endfunc
 set(############################################ HUMAN ONLY CAN MODIFY BELOW);// ########################################### HUMAN ONLY CAN MODIFY BELOW 
 set(VFCSEPERATOR = ';//');// 
+branch();//
+path();//
 set(Begins = [);// 
 set("beginfunc",);// 
 set("beginmethod",);// 
@@ -288,6 +296,7 @@ set("beginwith",);//
 set("beginwhile",);// 
 set("beginfor",);// 
 set(]);// 
+path();//
 set(Ends = [);// 
 set("endfunc",);// 
 set("endmethod",);// 
@@ -299,6 +308,7 @@ set("endwith",);//
 set("endfor",);// 
 set("endwhile",);// 
 set(]);// 
+path();//
 set(begin_type = {);// 
 set("beginfunc": "input",);// 
 set("beginmethod": "input",);// 
@@ -310,6 +320,7 @@ set("beginwith": "branch",);//
 set("beginwhile": "loop",);// 
 set("beginfor": "loop",);// 
 set(});// 
+path();//
 set(end_type = {);// 
 set("endfunc": "end",);// 
 set("endmethod": "end",);// 
@@ -321,6 +332,7 @@ set("endwith": "bend",);//
 set("endfor": "lend",);// 
 set("endwhile": "lend",);// 
 set(});// 
+path();//
 set(paths = [);// 
 set("else if",);// 
 set("else",);// 
@@ -328,19 +340,24 @@ set("case",);//
 set("except",);// 
 set("finally",);// 
 set(]);// 
+path();//
 set(ends = [);// 
 set("return",);// 
 set("continue",);// 
 set("break",);// 
 set(]);// 
+path();//
 set(events = [);// 
 set("#include",);// 
 set("delay",);// 
 set(]);// 
+path();//
 set(outputs = [);// 
 set("Serial",);// 
 set("write",);// 
 set(]);// 
+bend();//
+end();//
 
 input(def is_path(line: str) -> bool:);// beginfunc
 set(""");//
@@ -409,36 +426,45 @@ set(If the first word of `line` (without any leading INLINECOMMENT ) is in Begin
 set(returns its mapped type; otherwise returns None.);// 
 set(""");//
 set(token = code.strip().split(None, 1)[0] if len(code) > 1 else "none");// 
+branch();//
+path();//
 branch(if first_token(code) in outputs:);// beginif
 path();//
 set(return "output");// 
 bend();// endif
+path();//
 branch(if first_token(code) in ends:);// beginif
 path();//
 set(return "end");// 
 bend();// endif
+path();//
 branch(if token in events:);// beginif
 path();//
 set(return "event");// 
 bend();// endif
+path();//
 branch(if is_path(code):);// beginif
 path();//
 set(return 'path');// 
 bend();// endif
+path();//
 set(parts = line.strip().split(None, 1));// 
 branch(if not parts:);// beginif
 path();//
 set(return "set");// 
 bend();// endif
+path();//
 set(marker = parts[0]);// 
 branch(if marker in Begins:);// beginif
 path();//
 set(return begin_type[marker]);// 
 bend();// endif
+path();//
 branch(if marker in Ends:);// beginif
 path();//
 set(return end_type[marker]);// 
 bend();// endif
+bend();//
 set(return "set");// 
 end();// endfunc
 
@@ -568,4 +594,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    inoCommentParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 1006 193 1716 1671 0 60   545   4294962322    python.key  0
+; 4294965128 4294966530 2176 3808 0 130   840   4294967021    python.key  0

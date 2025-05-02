@@ -1,10 +1,10 @@
-"""
-Complete Arduino Structure Comment Parser
-A two-phase parser that:
-1) Formats Arduino code using clang-format (plus indents else-if blocks)
-2) Adds structure comments with focus on functions and control structures, correctly handling if-else chains
-Usage: ./arduino_parser.py input.ino -o output.ino
-"""
+
+
+
+
+
+
+
 import subprocess
 import sys
 import os
@@ -12,27 +12,32 @@ import argparse
 import tempfile
 import re
 from typing import List, Tuple, Optional, Set
-STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),
-"for":     ("beginfor",    "endfor"),
-"while":   ("beginwhile",  "endwhile"),
-"switch":  ("beginswitch","endswitch"),
-"function":("beginfunc",   "endfunc")}
-config = """
-Language: Cpp
-BasedOnStyle: Google
-IndentWidth: 4
-AccessModifierOffset: -4
-AllowShortIfStatementsOnASingleLine: false
-AllowShortLoopsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: None
-BreakBeforeBraces: Allman
-ColumnLimit: 100
-PointerAlignment: Left
-SortIncludes: false
-ReflowComments: false
-UseTab: Never
-SpacesBeforeTrailingComments: 1
-"""
+
+
+	STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),
+	"for":     ("beginfor",    "endfor"),
+	"while":   ("beginwhile",  "endwhile"),
+	"switch":  ("beginswitch","endswitch"),
+	"function":("beginfunc",   "endfunc")}
+
+	config = """
+	Language: Cpp
+	BasedOnStyle: Google
+	IndentWidth: 4
+	AccessModifierOffset: -4
+	AllowShortIfStatementsOnASingleLine: false
+	AllowShortLoopsOnASingleLine: false
+	AllowShortFunctionsOnASingleLine: None
+	BreakBeforeBraces: Allman
+	ColumnLimit: 100
+	PointerAlignment: Left
+	SortIncludes: false
+	ReflowComments: false
+	UseTab: Never
+	SpacesBeforeTrailingComments: 1
+	"""
+	
+
 def create_clang_config():
 	"""Create a temporary clang-format configuration file for Arduino code."""
 	fd, path = tempfile.mkstemp(prefix='.clang-format-', text=True)
@@ -275,70 +280,80 @@ def process_file(input_file: str, output_file: str = None, skip_format: bool = F
 	
 ############################################ HUMAN ONLY CAN MODIFY BELOW
 VFCSEPERATOR = ';//'
-Begins = [
-"beginfunc",
-"beginmethod",
-"beginclass",
-"beginif",
-"begintry",
-"beginswitch",
-"beginwith",
-"beginwhile",
-"beginfor",
-]
-Ends = [
-"endfunc",
-"endmethod",
-"endclass",
-"endif",
-"endtry",
-"endswitch",
-"endwith",
-"endfor",
-"endwhile",
-]
-begin_type = {
-"beginfunc": "input",
-"beginmethod": "input",
-"beginclass": "input",
-"beginif": "branch",
-"begintry": "branch",
-"beginswitch": "branch",
-"beginwith": "branch",
-"beginwhile": "loop",
-"beginfor": "loop",
-}
-end_type = {
-"endfunc": "end",
-"endmethod": "end",
-"endclass": "end",
-"endif": "bend",
-"endtry": "bend",
-"endswitch": "bend",
-"endwith": "bend",
-"endfor": "lend",
-"endwhile": "lend",
-}
-paths = [
-"else if",
-"else",
-"case",
-"except",
-"finally",
-]
-ends = [
-"return",
-"continue",
-"break",
-]
-events = [
-"#include",
-"delay",
-]
-outputs = [
-"Serial",
-"write",
-]
+
+	Begins = [
+	"beginfunc",
+	"beginmethod",
+	"beginclass",
+	"beginif",
+	"begintry",
+	"beginswitch",
+	"beginwith",
+	"beginwhile",
+	"beginfor",
+	]
+
+	Ends = [
+	"endfunc",
+	"endmethod",
+	"endclass",
+	"endif",
+	"endtry",
+	"endswitch",
+	"endwith",
+	"endfor",
+	"endwhile",
+	]
+
+	begin_type = {
+	"beginfunc": "input",
+	"beginmethod": "input",
+	"beginclass": "input",
+	"beginif": "branch",
+	"begintry": "branch",
+	"beginswitch": "branch",
+	"beginwith": "branch",
+	"beginwhile": "loop",
+	"beginfor": "loop",
+	}
+
+	end_type = {
+	"endfunc": "end",
+	"endmethod": "end",
+	"endclass": "end",
+	"endif": "bend",
+	"endtry": "bend",
+	"endswitch": "bend",
+	"endwith": "bend",
+	"endfor": "lend",
+	"endwhile": "lend",
+	}
+
+	paths = [
+	"else if",
+	"else",
+	"case",
+	"except",
+	"finally",
+	]
+
+	ends = [
+	"return",
+	"continue",
+	"break",
+	]
+
+	events = [
+	"#include",
+	"delay",
+	]
+
+	outputs = [
+	"Serial",
+	"write",
+	]
+	
+
 def is_path(line: str) -> bool:
 	"""
 	"""
@@ -400,35 +415,43 @@ def get_VFC_type(code : str, line: str) -> Optional[str]:
 	returns its mapped type; otherwise returns None.
 	"""
 	token = code.strip().split(None, 1)[0] if len(code) > 1 else "none"
-	if first_token(code) in outputs:
-	
-		return "output"
 		
-	if first_token(code) in ends:
-	
-		return "end"
+		if first_token(code) in outputs:
 		
-	if token in events:
+			return "output"
+			
 	
-		return "event"
+		if first_token(code) in ends:
 		
-	if is_path(code):
+			return "end"
+			
 	
-		return 'path'
+		if token in events:
 		
-	parts = line.strip().split(None, 1)
-	if not parts:
+			return "event"
+			
 	
-		return "set"
+		if is_path(code):
 		
-	marker = parts[0]
-	if marker in Begins:
+			return 'path'
+			
 	
-		return begin_type[marker]
+		parts = line.strip().split(None, 1)
+		if not parts:
 		
-	if marker in Ends:
+			return "set"
+			
 	
-		return end_type[marker]
+		marker = parts[0]
+		if marker in Begins:
+		
+			return begin_type[marker]
+			
+	
+		if marker in Ends:
+		
+			return end_type[marker]
+			
 		
 	return "set"
 	
@@ -549,5 +572,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 06:29:53 PM - 02:May:2025.
+#  Export  Date: 06:36:05 PM - 02:May:2025.
 
