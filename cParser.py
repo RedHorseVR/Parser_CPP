@@ -455,7 +455,10 @@ def generate_VFC(input_string):
 		if   re.match( r'^if\b', code ) and type != 'branch' :
 		
 			type = "branch"
-			fix_stack.append( 'bend' )
+			if not re.match( r'^if\b.*;$', code ) :
+			
+				fix_stack.append( 'bend' )
+				
 			comment = ' + br ' + comment
 		elif   code == '{' and (prev_type == 'path' or 'case' in prev_code )  :
 			fix_stack.append( 'end' )
@@ -466,6 +469,13 @@ def generate_VFC(input_string):
 		elif   type == 'path' and 'case' in prev_code  :
 			type = 'set'
 			comment = ' +cp ' + comment
+		elif   re.match( r'^try\b', code ) and type == 'set' :
+			type = 'branch'
+			fix_stack.append( 'bend' )
+			comment = ' + try ' + comment
+		elif   re.match( r".*\bcatch\b" , code )  :
+			type = 'path'
+			comment = ' + cat ' + comment
 		elif   re.match( r'^#if', code ) and type == 'set' :
 			type = 'branch'
 			comment = ' + #if ' + comment
@@ -474,7 +484,7 @@ def generate_VFC(input_string):
 			comment = ' + #eif ' + comment
 		elif   re.match( r'^return\b', code ) and type == 'set' :
 			type = 'end'
-			comment = ' + en ' + comment
+			comment = ' + end ' + comment
 		elif   re.match( r'} while\b', code ) and type == 'set' :
 			type = "lend"
 			comment = ' + dw ' + comment
@@ -493,8 +503,14 @@ def generate_VFC(input_string):
 			type = 'input'
 			if  not '}' in code  :
 			
-				fix_stack.append( 'end' )
-				comment = ' + in ' + comment
+				if  not r';' in code  :
+				
+					fix_stack.append( 'end' )
+					comment = ' + in ' + comment
+				else:
+					type = 'process'
+					comment = ' + pr in ' + comment
+					
 			else:
 				comment = ' + sl in ' + comment
 				
@@ -504,7 +520,7 @@ def generate_VFC(input_string):
 				type = fix_stack.pop()
 				comment = ' + pop  ' + comment
 			except :
-				type = 'bend'
+				type = 'set'
 				comment = ' + def pop  ' + comment
 				
 			
@@ -520,16 +536,16 @@ def generate_VFC(input_string):
 			
 		if type == "input" :
 		
-			VFC += f"end(){VFCSEPERATOR}\n"
+			pass
 			
 		VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n'
-		if type == "input" :
-		
-			VFC += f"end(){VFCSEPERATOR}\n"
-			
 		if type == "branch":
 		
 			VFC += f"path(){VFCSEPERATOR}\n"
+			
+		if type == "branch" and re.match( r'^if\b.*;$', code ) :
+		
+			VFC += f"bend(){VFCSEPERATOR}\n"
 			
 		if marker == "beginclass" :
 		
@@ -627,5 +643,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 04:16:11 PM - 08:May:2025.
+#  Export  Date: 02:50:10 PM - 09:May:2025.
 

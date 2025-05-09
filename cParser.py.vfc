@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cParser.py.vfc
-;  File Date : 04:16:11 PM - 08:May:2025
+;  File Date : 02:50:10 PM - 09:May:2025
 
 set();//"""
 set( );//Complete Arduino Structure Comment Parser
@@ -467,7 +467,10 @@ set(#---------------------------------------------------------------------------
 branch(if   re.match( r'^if\b', code ) and type != 'branch' :);//
 path();//
 set(type = "branch");// 
+branch(if not re.match( r'^if\b.*;$', code ) :);// 
+path();//
 set(fix_stack.append( 'bend' ));// 
+bend();// endif
 set(comment = ' + br ' + comment);//
 path(elif   code == '{' and (prev_type == 'path' or 'case' in prev_code )  :);//elif   code == '{'   :
 set(fix_stack.append( 'end' ));// 
@@ -478,6 +481,13 @@ set(comment = ' +ev ' + comment);//
 path(elif   type == 'path' and 'case' in prev_code  :);//collapse paths 
 set(type = 'set');// 
 set(comment = ' +cp ' + comment);//
+path(elif   re.match( r'^try\b', code ) and type == 'set' :);//
+set(type = 'branch');// 
+set(fix_stack.append( 'bend' ));// 
+set(comment = ' + try ' + comment);//
+path(elif   re.match( r".*\bcatch\b" , code )  :);//elif   re.match( r'} catch (const exception& e) {', code ) and type == 'set' :
+set(type = 'path');// 
+set(comment = ' + cat ' + comment);//
 path(elif   re.match( r'^#if', code ) and type == 'set' :);//
 set(type = 'branch');// 
 set(comment = ' + #if ' + comment);//
@@ -486,7 +496,7 @@ set(type = 'bend');//
 set(comment = ' + #eif ' + comment);//
 path(elif   re.match( r'^return\b', code ) and type == 'set' :);//
 set(type = 'end');// 
-set(comment = ' + en ' + comment);//
+set(comment = ' + end ' + comment);//
 path(elif   re.match( r'} while\b', code ) and type == 'set' :);//
 set(type = "lend");// 
 set(comment = ' + dw ' + comment);//
@@ -505,8 +515,14 @@ path(elif   re.match(function_type, code ) or re.match(method_type, code ) or re
 set(type = 'input');// 
 branch(if  not '}' in code  :);//
 path();//
+branch(if  not r';' in code  :);//
+path();//
 set(fix_stack.append( 'end' ));// 
 set(comment = ' + in ' + comment);//
+path(else: );//
+set(type = 'process');// 
+set(comment = ' + pr in ' + comment);//
+bend( );//
 path(else: );//
 set(comment = ' + sl in ' + comment);//
 bend( );//
@@ -516,7 +532,7 @@ path(try:);//
 set(type = fix_stack.pop());// 
 set(comment = ' + pop  ' + comment);//
 path(except :);//
-set( type = 'bend');//type = 'set'
+set(type = 'set');// type = 'bend'
 set(comment = ' + def pop  ' + comment);//
 bend( );//
 bend( );//
@@ -532,16 +548,16 @@ set(VFC += f"bend(){VFCSEPERATOR}\n");//
 bend();// endif
 branch(if type == "input" :);// 
 path();//
-set(VFC += f"end(){VFCSEPERATOR}\n");// 
+output( pass);////VFC += f"end(){VFCSEPERATOR}\n"//
 bend();// endif
 output(VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n');//// //
-branch(if type == "input" :);// 
-path();//
-set(VFC += f"end(){VFCSEPERATOR}\n");// 
-bend();// endif
 branch(if type == "branch":);// beginif
 path();//
 set(VFC += f"path(){VFCSEPERATOR}\n");// 
+bend();// endif
+branch(if type == "branch" and re.match( r'^if\b.*;$', code ) :);// 
+path();//
+set(VFC += f"bend(){VFCSEPERATOR}\n");// 
 bend();// endif
 branch(if marker == "beginclass" :);// beginif
 path();//
@@ -648,4 +664,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 68 144 1766 824 470 149   709   4294951507    python.key  0
+; 103 48 1766 824 532 159   802   4294949049    python.key  0
