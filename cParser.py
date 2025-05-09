@@ -473,6 +473,9 @@ def generate_VFC(input_string):
 			type = 'branch'
 			fix_stack.append( 'bend' )
 			comment = ' + try ' + comment
+		elif   re.match( r".*\bcase\b" , code )  :
+			type = 'path'
+			comment = ' + case ' + comment
 		elif   re.match( r".*\bcatch\b" , code )  :
 			type = 'path'
 			comment = ' + cat ' + comment
@@ -643,5 +646,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 02:50:10 PM - 09:May:2025.
+#  Export  Date: 03:52:31 PM - 09:May:2025.
 
