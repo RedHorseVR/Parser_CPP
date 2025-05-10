@@ -13,14 +13,12 @@ import tempfile
 import re
 from typing import List, Tuple, Optional, Set
 
-
-	STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),
+STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),
 	"for":     ("beginfor",    "endfor"),
 	"while":   ("beginwhile",  "endwhile"),
 	"switch":  ("beginswitch","endswitch"),
 	"function":("beginfunc",   "endfunc")}
-
-	config = """
+config = """
 	Language: Cpp
 	BasedOnStyle: Google
 	IndentWidth: 4
@@ -79,19 +77,17 @@ def format_code(code: str) -> str:
 	"""
 	try:
 	
-		config_path = create_clang_config()
-		try:
 		
-			subprocess.run(['clang-format', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-		except (subprocess.SubprocessError, FileNotFoundError):
-			print("Error: clang-format not found. Please install clang-format.", file=sys.stderr)
-			os.unlink(config_path)
-			sys.exit(1)
-			
-		proc = subprocess.run(['clang-format', f'-style=file:{config_path}'], input=code.encode('utf-8'), stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-		formatted = proc.stdout.decode('utf-8')
-		os.unlink(config_path)
-		return indent_else_blocks(formatted)
+		
+		
+		clang_format_path = r"C:\\Users\\lopezl10\\AppData\\Roaming\\Python\\Python312\\Scripts\\clang-format"
+		clang_yaml_path = r"C:\\Users\\lopezl10\\AppData\\Local\\RedHorseVR\\C2VFC_parser\\vfc.yaml"
+		stream = os.popen(f'"{clang_format_path}" -style=file:"{clang_yaml_path}" "{code_file}"')
+		
+		formatted = stream.read()
+		print( "--->" + code_file )
+		print( "output: [ " ,  formatted + "]" )
+		return formatted
 	except Exception as e:
 		print(f"Error during formatting: {e}", file=sys.stderr)
 		sys.exit(1)
@@ -260,6 +256,10 @@ def add_structure_comments(code: str) -> str:
 	return '\n'.join(result)
 	
 def process_file(input_file: str, output_file: str = None, skip_format: bool = False) -> None:
+	
+	
+	global code_file
+	code_file = input_file
 	try:
 	
 		code = open(input_file).read()
@@ -280,8 +280,7 @@ def process_file(input_file: str, output_file: str = None, skip_format: bool = F
 	
 ############################################ HUMAN ONLY CAN MODIFY BELOW
 VFCSEPERATOR = ';//'
-
-	Begins = [
+Begins = [
 	"beginfunc",
 	"beginmethod",
 	"beginclass",
@@ -292,8 +291,7 @@ VFCSEPERATOR = ';//'
 	"beginwhile",
 	"beginfor",
 	]
-
-	Ends = [
+Ends = [
 	"endfunc",
 	"endmethod",
 	"endclass",
@@ -304,8 +302,7 @@ VFCSEPERATOR = ';//'
 	"endfor",
 	"endwhile",
 	]
-
-	begin_type = {
+begin_type = {
 	"beginfunc": "input",
 	"beginmethod": "input",
 	"beginclass": "input",
@@ -316,8 +313,7 @@ VFCSEPERATOR = ';//'
 	"beginwhile": "loop",
 	"beginfor": "loop",
 	}
-
-	end_type = {
+end_type = {
 	"endfunc": "end",
 	"endmethod": "end",
 	"endclass": "end",
@@ -328,27 +324,23 @@ VFCSEPERATOR = ';//'
 	"endfor": "lend",
 	"endwhile": "lend",
 	}
-
-	paths = [
+paths = [
 	"else if",
 	"else",
 	"case",
 	"except",
 	"finally",
 	]
-
-	ends = [
+ends = [
 	"return",
 	"continue",
 	"break",
 	]
-
-	events = [
+events = [
 	"#include",
 	"delay",
 	]
-
-	outputs = [
+outputs = [
 	"Serial",
 	"write",
 	]
@@ -410,54 +402,45 @@ def first_token(code):
 	return tokens[0] if tokens else "none"
 	
 def get_VFC_type(code : str, line: str) -> Optional[str]:
-	"""
-	If the first word of `line` (without any leading INLINECOMMENT ) is in Begins or Ends,
-	returns its mapped type; otherwise returns None.
-	"""
+	
+	
+	
+	
 	token = code.strip().split(None, 1)[0] if len(code) > 1 else "none"
-		
-		if first_token(code) in outputs:
-		
-			return "output"
-			
+	if first_token(code) in outputs:
 	
-		if first_token(code) in ends:
+		return "output"
+	elif first_token(code) in ends:
+		return "end"
+	elif token in events:
+		return "event"
+	elif is_path(code):
+		return 'path'
 		
-			return "end"
-			
+	parts = line.strip().split(None, 1)
+	if not parts:
 	
-		if token in events:
+		return "set"
 		
-			return "event"
-			
+	marker = parts[0]
+	if marker in Begins:
 	
-		if is_path(code):
+		return begin_type[marker]
 		
-			return 'path'
-			
+	if marker in Ends:
 	
-		parts = line.strip().split(None, 1)
-		if not parts:
-		
-			return "set"
-			
-	
-		marker = parts[0]
-		if marker in Begins:
-		
-			return begin_type[marker]
-			
-	
-		if marker in Ends:
-		
-			return end_type[marker]
-			
+		return end_type[marker]
 		
 	return "set"
 	
 def generate_VFC(input_string):
 	strings = input_string.split("\n")
 	VFC = ''
+	fix_stack = []
+	function_type = r'(?:void|int|float|double|char|long|short|bool|inline|static|extern|APIENTRY|\w|\*|&)*\s+\w+\s*\('
+	method_type = r'\b[\w\s&\*]+::'
+	prev_type = 'set'
+	prev_code = ''
 	for string in strings:
 		if not string.strip():
 		
@@ -466,15 +449,106 @@ def generate_VFC(input_string):
 		code, comment = split_string(string)
 		code = code.strip()
 		type = get_VFC_type(code, comment)
+		#--------------------------------------------------------------------------------------------------------- FIX
+		#--------------------------------------------------------------------------------------------------------- FIX
+		#--------------------------------------------------------------------------------------------------------- FIX
+		if   re.match( r'^if\b', code ) and type != 'branch' :
+		
+			type = "branch"
+			if not re.match( r'^if\b.*;$', code ) :
+			
+				fix_stack.append( 'bend' )
+				
+			comment = ' + br ' + comment
+		elif   code == '{' and (prev_type == 'path' or 'case' in prev_code )  :
+			fix_stack.append( 'end' )
+			comment = ' + p{ ' + comment
+		elif   '#pragma' in code  :
+			type = 'event'
+			comment = ' +ev ' + comment
+		elif   type == 'path' and 'case' in prev_code  :
+			type = 'set'
+			comment = ' +cp ' + comment
+		elif   re.match( r'^try\b', code ) and type == 'set' :
+			type = 'branch'
+			fix_stack.append( 'bend' )
+			comment = ' + try ' + comment
+		elif   re.match( r".*\bcase\b" , code )  :
+			type = 'path'
+			comment = ' + case ' + comment
+		elif   re.match( r".*\bcatch\b" , code )  :
+			type = 'path'
+			comment = ' + cat ' + comment
+		elif   re.match( r'^#if', code ) and type == 'set' :
+			type = 'branch'
+			comment = ' + #if ' + comment
+		elif   re.match( r'^#end', code ) and type == 'set' :
+			type = 'bend'
+			comment = ' + #eif ' + comment
+		elif   re.match( r'^return\b', code ) and type == 'set' :
+			type = 'end'
+			comment = ' + end ' + comment
+		elif   re.match( r'} while\b', code ) and type == 'set' :
+			type = "lend"
+			comment = ' + dw ' + comment
+		elif   re.match( r'^default\b', code )  or  re.match( r'^#else', code )   :
+			type = "path"
+			
+			comment = ' + def ' + comment
+		elif   re.match( r'\} else\b', code ) and type != 'path' :
+			type = "path"
+			comment = ' + pa ' + comment
+		elif ( re.match( r'^while\b', code ) or re.match( r'^for\b', code ) or re.match( r'^do\b', code )  )  and type != 'loop' :
+			type = "loop"
+			fix_stack.append( 'lend' )
+			comment = ' + lo ' + comment
+		elif   re.match(function_type, code ) or re.match(method_type, code ) or re.match( r'\w*\s+APIENTRY' ,  code ) :
+			type = 'input'
+			if  not '}' in code  :
+			
+				if  not r';' in code  :
+				
+					fix_stack.append( 'end' )
+					comment = ' + in ' + comment
+				else:
+					type = 'process'
+					comment = ' + pr in ' + comment
+					
+			else:
+				comment = ' + sl in ' + comment
+				
+		elif   re.match( r'^}$', code ) and type == 'set' :
+			#try-catch-exception
+			try:
+				type = fix_stack.pop()
+				comment = ' + pop  ' + comment
+			except :
+				type = 'set'
+				comment = ' + def pop  ' + comment
+				
+			
+		prev_type = type
+		prev_code = code
+		#--------------------------------------------------------------------------------------------------- FIX
+		#--------------------------------------------------------------------------------------------------- FIX
+		#--------------------------------------------------------------------------------------------------- FIX
 		marker = get_marker( comment )
 		if marker == "endclass" :
 		
 			VFC += f"bend(){VFCSEPERATOR}\n"
 			
+		if type == "input" :
+		
+			pass
+			
 		VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n'
 		if type == "branch":
 		
 			VFC += f"path(){VFCSEPERATOR}\n"
+			
+		if type == "branch" and re.match( r'^if\b.*;$', code ) :
+		
+			VFC += f"bend(){VFCSEPERATOR}\n"
 			
 		if marker == "beginclass" :
 		
@@ -493,7 +567,7 @@ def  footer( exportname  ):
 	foot+= f'; { os.path.basename(exportname) } // \n'
 	foot+='; notepad.exe\n'
 	foot+=f';{ENVTOK} EMBEDDED ALTSESSION INFORMATION\n'
-	foot+='; 880 168 766 1516 0 110   392   31 ino.key  0\n'
+	foot+='; 880 168 766 1516 0 110   392   31 C++.key  0\n'
 	return foot
 	
 def __fix_VFC_paths( input_string ):
@@ -572,5 +646,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 06:36:05 PM - 02:May:2025.
+#  Export  Date: 03:52:31 PM - 09:May:2025.
 
