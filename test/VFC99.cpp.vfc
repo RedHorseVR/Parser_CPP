@@ -1,0 +1,657 @@
+;  IRL FlowCode Version: Version 10.0
+;  c1995-2015: Visual Flow Coder by 2LResearch
+;
+;  File Name : VFC99.cpp.vfc
+;  File Date : 01:18:00 PM - 10:May:2025
+
+set(/* includes */);// 
+event(#include <windows.h>);// 
+event(#include "about.h");// 
+event(#include "globals.h");// 
+event(#include "insecta.h");// 
+set(// #include "winproc.h";);//  #include 0;
+set(// #include "getreg.h";);//  #include 0;
+set(// #include "project.h";);//  #include 0;
+set(// #include "environ.h";);//  #include 0;
+event(#include "InsectaStartup.h");// 
+event(#include "winproc_externs.h");// 
+set(/* globals */);// 
+process(int TimeExpired(char*, char*, char*););//  + pr in 
+set(int ClearRegFlag = FALSE;);// 
+set(int InsectaRunMode = FALSE;);// 
+set(class InsectaStartup Startup;);// 
+set(char GotoMsg[300];);// 
+set(int GotoZoom = 0;);// 
+set(char vfc99_directory[356];);// 
+set(/* externals */);// 
+process(void ParseAndExecuteTool(char* cmd););//  + pr in 
+set(extern char InsectaFilename[255];);// 
+set(extern HWND hICodeDlg;);// 
+set(extern HWND hObjPropDlg;);// 
+set(extern HWND MainWindow;);// 
+set(/* defines */);// 
+set(#define TRACKING 0);// 
+set(#define MESSG);// 
+set({);// 
+set(MessageBox(MainWindow, "Debug", "Break", 0););// 
+set(});//  + def pop  
+set(#define TRACK);// 
+set(#define TRACK);// 
+set(/* prototypes */);// 
+process(int SwapMacro(char* line, char* macro, char* swap););//  + pr in 
+
+input(int GetKeyFileCommand(char* key, char* cmd_buffer) {);//  + in 
+set(#define MAXLINE_SIZE 500);// 
+set(#define KEYFILE_TARGET cmd_buffer);// 
+set(char keyfile[600];);// 
+set(wsprintf(keyfile, "%s\\%s", Project.Env->LibraryDir, key););// 
+set(FILE* fp = fopen(keyfile, "r"););// 
+set(char string[MAXLINE_SIZE];);// 
+set(// TRACK MessageBox( hWnd , keyfile , " Pman opening ", MB_OK);;);//  TRACK MessageBox( hWnd , keyfile , 0, MB_OK);;
+set(// TRACK MessageBox( hWnd , key , " Pman LOOKING ", MB_OK);;);//  TRACK MessageBox( hWnd , key , 0, MB_OK);;
+branch(if (fp) {);// beginif
+path();//
+loop(while (fgets(string, MAXLINE_SIZE, fp)) {);// beginwhile
+branch(if (strstr(string, KEYFILE_TARGET)) {);// beginif
+path();//
+set(fgets(string, MAXLINE_SIZE, fp););// 
+set(strcpy(cmd_buffer, string););// 
+set(fclose(fp););// 
+branch(if (*string) {);// beginif
+path();//
+end(return 1;);//  + end 
+path(} else {);//  + pa 
+end(return 0;);//  + end 
+bend(});// endif
+path(} else {);//  + pa 
+bend(});// endif
+lend(});// endwhile
+set(fclose(fp););// 
+path(} else {);//  + pa 
+set(MessageBox(0, keyfile, "The key file did not open", MB_OK););// 
+bend(});// endif
+end(return 0;);//  + end 
+end(});//  + pop  
+
+input(int GetKeyWordFilter(char* file, char* key_buffer) {);//  + in 
+set(#define MAXLINE_SIZE 500);// 
+set(FILE* fp = fopen(file, "r"););// 
+set(char string[MAXLINE_SIZE];);// 
+set(*key_buffer = '\0';);// 
+branch(if (fp) {);// beginif
+path();//
+loop(while (fgets(string, MAXLINE_SIZE, fp)) {);// beginwhile
+branch(if (strstr(string, ";INSECTA EMBEDDED SESSION INFORMATIO")) {);// beginif
+path();//
+set(fgets(string, MAXLINE_SIZE, fp););// 
+set(fgets(string, MAXLINE_SIZE, fp););// 
+set(char* tok = strtok(string, " ;\t"););// 
+set(strcpy(ExportFileName, tok););// 
+set(wsprintf(Project.ExportName, ExportFileName););// 
+set(// MessageBox( 0, ExportFileName , " ExportFileName ", MB_OK);;);//  MessageBox( 0, ExportFileName , 0, MB_OK);;
+loop(while (fgets(string, MAXLINE_SIZE, fp)) {);// beginwhile
+branch(if (strstr(string, ";INSECTA EMBEDDED ALTSESSION INFORMATIO")) {);// beginif
+path();//
+set(fgets(string, MAXLINE_SIZE, fp););// 
+set(fclose(fp););// 
+set(char* s = strstr(string, ".key"););// 
+branch(if (s) {);// beginif
+path();//
+set(*s = NULL;);// 
+loop(while (s > string && *s != ' ' && *s != '\t') {);// beginwhile
+set(s--;);// 
+lend(});// endwhile
+set(wsprintf(key_buffer, "%s.key", ++s););// 
+end(return 1;);//  + end 
+path(} else {);//  + pa 
+end(return 0;);//  + end 
+bend(});// endif
+bend(});// endif
+lend(});// endwhile
+set(fclose(fp););// 
+end(return 0;);//  + end 
+path(} else {);//  + pa 
+bend(});// endif
+lend(});// endwhile
+set(fclose(fp););// 
+path(} else {);//  + pa 
+set(MessageBox(0, file, "The VFC file did not open", MB_OK););// 
+bend(});// endif
+end(return 0;);//  + end 
+end(});//  + pop  
+
+input(void LoadExecuteKeyTool(char* file, char* tool) {);//  + in 
+set(char key_buffer[600];);// 
+set(GetKeyWordFilter(file, key_buffer););// 
+set(GetKeyFileCommand(key_buffer, tool););// 
+branch(if (*tool) {);// beginif
+path();//
+set(char* s = strrchr(tool, '|'););// 
+branch(if (s) {);// beginif
+path();//
+set(*s = NULL;);// 
+bend(});// endif
+set(int flag = 0;);// 
+set(flag += SwapMacro(tool, "<ExportFileName", ExportFileName););// 
+set(flag += SwapMacro(tool, "<InsectaFileName", InsectaFilename););// 
+set(flag += SwapMacro(tool, "<CurrentObject", InsectaFilename););// 
+set(flag += SwapMacro(tool, "<CurrentDir", Project.Env->CurrentDir););// 
+set(// MessageBox( MainWindow , tool , " debug ", MB_OK);;);//  MessageBox( MainWindow , tool , 0, MB_OK);;
+set(char* tok = strstr(tool, ">."););// 
+set(// MessageBox( MainWindow , tool , " debug ", MB_OK);;);//  MessageBox( MainWindow , tool , 0, MB_OK);;
+branch(if (tok && flag) {);// beginif
+path();//
+set(char str[100];);// 
+set(s = tok;);// 
+loop(while (s > tool && *s != '<' && *s != '.') {);// beginwhile
+set(s--;);// 
+lend(});// endwhile
+branch(if (*s == '.') {);// beginif
+path();//
+set(// MessageBox( 0 , tool , " if ", MB_OK);;);//  MessageBox( 0 , tool , 0, MB_OK);;
+set(*(tok + 1) = NULL;);// 
+set(strncpy(str, s, 99););// 
+set(*(tok + 1) = '.';);// 
+branch(if (*(tok + 2) == ' ' || *(tok + 2) == '\t') {);// beginif
+path();//
+set(strcat(str, "."););// 
+bend(});// endif
+set(SwapMacro(tool, str, ""););// 
+path(} else {);//  + pa 
+set(// MessageBox( 0 , tool , " else ", MB_OK);;);//  MessageBox( 0 , tool , 0, MB_OK);;
+set(SwapMacro(tool, ">.", ""););// 
+bend(});// endif
+path(} else if (flag) {);//  + pa 
+set(SwapMacro(tool, ">", ""););// 
+bend(});// endif
+set(// MessageBox( 0 , tool , " tool ", MB_OK);;);//  MessageBox( 0 , tool , 0, MB_OK);;
+set(WinExec(tool, SW_NORMAL););// 
+path(} else {);//  + pa 
+set(MessageBox(0, key_buffer, "No tool", MB_OK););// 
+bend(});// endif
+end(});//  + pop  
+set(inline int iswhite(char c) { return (c == ' ' || c == '\t'); });// 
+
+input(void SetLongFileName(char* name) {);//  + in 
+set(WIN32_FIND_DATA fd;);// 
+set(*fd.cFileName = NULL;);// 
+set(FindFirstFile(name, &fd););// 
+branch(if (*(fd.cFileName)) {);// beginif
+path();//
+set(strcpy(name, fd.cFileName););// 
+bend(});// endif
+end(});//  + pop  
+set(char ProgramName[100] = "VFC99.exe";  // char ProgramName[100] = "insecta2.exe";;);//  char ProgramName[100] = 0;;
+set(int GotoLine;);// 
+
+input(int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {);//  + in 
+set(char *cmdline, *flags = NULL;);// 
+set(hInst = hInstance;);// 
+set(char* file_spec = vfc99_directory;);// 
+set(*vfc99_directory = NULL;);// 
+set(SearchPath(NULL, "vfc99.exe", NULL, 355, vfc99_directory, &file_spec););// 
+branch(if (file_spec && *file_spec) {);// beginif
+path();//
+set(*--file_spec = NULL;);// 
+bend(});// endif
+set(// MessageBox( NULL , vfc99_directory , " VFC99 ", MB_OK);;);//  MessageBox( NULL , vfc99_directory , 0, MB_OK);;
+branch(#ifdef DEMO);//  + #if 
+path();//
+set(MAX_DEMO_OBJECTS = NUM_OBJECTS_LIMIT;);// 
+bend(#endif);//  + #eif 
+branch(if (lpCmdLine && *lpCmdLine) {);// beginif
+path();//
+set(char* reg = NULL;  //  this is the pointer to the optional -/ command  ... NOTE '-' char must be seen AFTER .ins and BEFORE the '\' dir delimiter in DOS;);//   this is the pointer to the optional -/ command  ... NOTE 0 char must be seen AFTER .ins an
+set(char* ptr = lpCmdLine;);// 
+loop(while (SwapMacro(lpCmdLine, "\"", "")) {);// beginwhile
+lend(});// endwhile
+set(char* d1 = strstr(lpCmdLine, ".ins"););// 
+branch(if (d1) {);// beginif
+path();//
+set(ptr = ++d1;);// 
+bend(});// endif
+set(// d1=strstr(lpCmdLine,".ins\t");;);//  d1=strstr(lpCmdLine,0);;
+set(flags = strrchr(lpCmdLine, '-');// 
+branch(if (flags && !strchr(flags, '\\'))//  decide if this is a parma or part of the path by seeing that NO '\' s exist;);//  + br   decide if this is a parma or part of the path by seeing that NO 0 s exist;
+path();//
+bend();//
+set({);// 
+set(reg = strtok(++flags, " "););// 
+path(} else {);//  + pa 
+set(flags = 0;);// 
+end(});//  + pop  
+set(strtok(ptr, "-");// 
+set(cmdline = lpCmdLine;        //  cmdline=strtok(lpCmdLine,"-");/  ;);//   cmdline=strtok(lpCmdLine,0);/  ;
+branch(if (cmdline && *cmdline != '-' && strlen(cmdline)));// beginif
+path({);//
+set(char path[300], *dir = strrchr(cmdline, '\\'););// 
+branch(if (dir) {);// beginif
+path();//
+set(*dir = NULL;);// 
+set(wsprintf(path, "%s\\", cmdline););// 
+set(SetCurrentDirectory(path););// 
+set(GetCurrentDirectory(255, Project.Env->CurrentDir););// 
+set(cmdline = ++dir;);// 
+bend(});// endif
+set(char* tok = cmdline + strlen(cmdline) - 1;);// 
+loop(while (tok > cmdline && iswhite(*tok)) {);// beginwhile
+set(*tok = NULL;);// 
+set(tok--;);// 
+lend(});// endwhile
+set(strcpy(InsectaFilename, cmdline););// 
+set(char flowfile_name[300];);// 
+set(wsprintf(flowfile_name, "%s.ins", InsectaFilename););// 
+set(FILE* fptr = fopen(flowfile_name, "r"););// 
+branch(if (fptr) {);// beginif
+path();//
+set(fclose(fptr););// 
+set(// MessageBox( NULL , flowfile_name  , " VFC99 IF", MB_OK);;);//  MessageBox( NULL , flowfile_name  , 0, MB_OK);;
+set(wsprintf(InsectaFilename, "%s", flowfile_name););// 
+path(} else {);//  + pa 
+set(char* insfile = strrchr(InsectaFilename, '.'););// 
+branch(if (insfile) {);// beginif
+path();//
+set(*insfile = '\0';);// 
+set(wsprintf(flowfile_name, "%s.ins", InsectaFilename););// 
+set(// MessageBox( NULL , flowfile_name  , " VFC99 IF", MB_OK);;);//  MessageBox( NULL , flowfile_name  , 0, MB_OK);;
+set(FILE* fptr = fopen(flowfile_name, "r"););// 
+branch(if (fptr) {);// beginif
+path();//
+set(fclose(fptr););// 
+set(wsprintf(InsectaFilename, "%s", flowfile_name););// 
+path(} else {);//  + pa 
+bend(});// endif
+path(} else {);//  + pa 
+bend(});// endif
+bend(});// endif
+set(SetLongFileName(InsectaFilename););// 
+set(HWND H;);// 
+branch(if ((H = FindWindow(APPNAME, InsectaFilename)) && !strstr(InsectaFilename, "Run")) {);// beginif
+path();//
+set(char* go = NULL;);// 
+branch(if (reg && strstr(reg, "Goto")) {);// beginif
+path();//
+set(InsectaRunMode = 0;);// 
+set(flags = 0;);// 
+branch(if (cmdline && (go = strstr(reg, "Goto"))) {);// beginif
+path();//
+set(go += (strlen("Goto") + 1););// 
+set(sscanf(go, "%d %d", &GotoLine, &GotoZoom););// 
+set(*GotoMsg = NULL;);// 
+set(strncat(GotoMsg, &go[4], 298););// 
+set(// strcat(GotoMsg, "");;);//  strcat(GotoMsg, 0);;
+set(nCmdShow = SW_SHOW;);// 
+bend(});// endif
+bend(});// endif
+branch(if (go) {);// beginif
+path();//
+branch(if (GotoLine) {);// beginif
+path();//
+set(SendMessage(H, WM_COMMAND, GOTO_LINE, GotoLine););// 
+path(} else {);//  + pa 
+bend(});// endif
+branch(if (GotoZoom < 0) {);// beginif
+path();//
+set(SendMessage(H, WM_COMMAND, ID_FONT_SMALLER, 0););// 
+path(} else if (GotoZoom > 0) {);//  + pa 
+set(SendMessage(H, WM_COMMAND, ID_FONT_LARGER, 0););// 
+path(} else {);//  + pa 
+bend(});// endif
+path(} else {);//  + pa 
+set(SetWindowPos(H, HWND_TOPMOST, 0, 0, 100, 100, SWP_NOMOVE | SWP_NOSIZE););// 
+set(SetActiveWindow(H););// 
+set(ShowWindow(H, SW_RESTORE););// 
+set(Sleep(50););// 
+set(SetWindowPos(H, HWND_NOTOPMOST, 0, 0, 100, 100, SWP_NOMOVE | SWP_NOSIZE););// 
+bend(});// endif
+end(return 0;);//  + end 
+path(} else {);//  + pa 
+bend(});// endif
+path(} else {);//  + pa 
+bend(});// endif
+set(InsectaRunMode = Startup.GetStartupCommand(InsectaFilename););// 
+branch(if (reg) {);// beginif
+path();//
+set(char* go = NULL;);// 
+branch(if (strstr(reg, "WorkSpaceFolder")) {);// beginif
+path();//
+set(char temp_buff[556];);// 
+set(char buff[256];);// 
+set(GetCurrentDirectory(255, buff););// 
+set(wsprintf(temp_buff, "Explorer.exe  %s", Project.Env->CurrentDir););// 
+set(WinExec(temp_buff, SW_NORMAL););// 
+end(return 0;);//  + end 
+bend(});// endif
+set(char cmd_buff[600];);// 
+branch(if (strstr(reg, "RunButton")) {);// beginif
+path();//
+set(InsectaRunMode = RUN_BUTTON_COMMAND;);// 
+set(wsprintf(cmd_buff, "RUN_BUTTON"););// 
+set(LoadExecuteKeyTool(InsectaFilename, cmd_buff););// 
+end(return 0;);//  + end 
+path(} else if (strstr(reg, "CompileButton")) {);//  + pa 
+set(InsectaRunMode = COMPILE_BUTTON_COMMAND;);// 
+set(wsprintf(cmd_buff, "COMPILE_BUTTON"););// 
+set(LoadExecuteKeyTool(InsectaFilename, cmd_buff););// 
+end(return 0;);//  + end 
+path(} else if (strstr(reg, "BuildButton")) {);//  + pa 
+set(InsectaRunMode = BUILD_BUTTON_COMMAND;);// 
+set(wsprintf(cmd_buff, "BUILD_BUTTON"););// 
+set(LoadExecuteKeyTool(InsectaFilename, cmd_buff););// 
+end(return 0;);//  + end 
+path(} else if (strstr(reg, "HelpButton")) {);//  + pa 
+set(InsectaRunMode = HELP_BUTTON_COMMAND;);// 
+set(wsprintf(cmd_buff, "HELP_BUTTON"););// 
+set(LoadExecuteKeyTool(InsectaFilename, cmd_buff););// 
+end(return 0;);//  + end 
+bend(});// endif
+branch(if (strstr(reg, "Goto")) {);// beginif
+path();//
+set(InsectaRunMode = 0;);// 
+set(flags = 0;);// 
+branch(if (cmdline && (go = strstr(reg, "Goto"))) {);// beginif
+path();//
+set(go += (strlen("Goto") + 1););// 
+set(sscanf(go, "%d %d", &GotoLine, &GotoZoom););// 
+set(strcpy(GotoMsg, go););// 
+set(strncat(GotoMsg, go, 298););// 
+set(// strcat(GotoMsg, "");;);//  strcat(GotoMsg, 0);;
+set(nCmdShow = SW_SHOW;);// 
+branch(if (strcmp(reg, "OpenGoto") == 0) {);// beginif
+path();//
+bend(});// endif
+bend(});// endif
+bend(});// endif
+branch(if (strstr(reg, "NewRegistration")) {);// beginif
+path();//
+set(nCmdShow = SW_MAXIMIZE;);// 
+set(strcpy(InsectaFilename, "untitled.ins"););// 
+set(ClearRegFlag = TRUE;);// 
+bend(});// endif
+branch(if (strstr(reg, "Demo")) {);// beginif
+path();//
+set(nCmdShow = SW_SHOW;);// 
+set(MAX_DEMO_OBJECTS = NUM_OBJECTS_LIMIT;);// 
+bend(});// endif
+branch(if (strstr(reg, "Run")) {);// beginif
+path();//
+set(InsectaRunMode = RUN_COMMAND;);// 
+set(flags = 0;);// 
+bend(});// endif
+branch(if (strstr(reg, "Applet")) {);// beginif
+path();//
+set(InsectaRunMode = APPLET_COMMAND;);// 
+path(} else {);//  + pa 
+set(InsectaRunMode = 0;);// 
+set(flags = 0;);// 
+bend(});// endif
+branch(if (strstr(reg, "Document")) {);// beginif
+path();//
+set(InsectaRunMode = DOCUMENT_COMMAND;);// 
+set(flags = 0;);// 
+bend(});// endif
+branch(if (strstr(reg, "Print")) {);// beginif
+path();//
+set(InsectaRunMode = PRINT_COMMAND;);// 
+set(flags = 0;);// 
+bend(});// endif
+branch(if (strstr(reg, "Open")) {);// beginif
+path();//
+set(InsectaRunMode = 0;);// 
+set(flags = 0;);// 
+bend(});// endif
+branch(if (strstr(reg, "Clone")) {);// beginif
+path();//
+set(InsectaRunMode = CLONE_COMMAND;);// 
+set(SetLongFileName("untitled.ins"););// 
+set(flags = 0;);// 
+set(// DEBUG // MessageBox( 0 ,InsectaFilename , " title ", MB_OK);;);//  DEBUG // MessageBox( 0 ,InsectaFilename , 0, MB_OK);;
+bend(});// endif
+bend(});// endif
+path(} else {);//  + pa 
+set(nCmdShow = SW_SHOW;);// 
+bend(});// endif
+branch(if (!hPrevInstance) {);// beginif
+path();//
+branch(if (!InitApplication(hInstance)) {);// beginif
+path();//
+end(return FALSE;);//  + end 
+bend(});// endif
+bend(});// endif
+set(RECT r = {CW_USEDEFAULT, CW_USEDEFAULT, 550, 500};);// 
+branch(if (!InitInstance(hInstance, nCmdShow, &r)) {);// beginif
+path();//
+end(return FALSE;);//  + end 
+bend(});// endif
+branch(#ifdef TIMELIMIT);//  + #if 
+path();//
+branch(if (RegObject.TimeExpired("April", "May", "424216")) {);// beginif
+path();//
+set(MessageBox(MainWindow,"The time limit on this evaluation copy has expired - VFC will only run in DEMO mode now.);//
+set(Please contact FlowLynx to purchase an unrestricted license.","Time Limit Expired",0););//
+set(MAX_DEMO_OBJECTS=NUM_OBJECTS_LIMIT ;);// 
+bend(});// endif
+bend(#endif);//  + #eif 
+branch(if (nCmdShow == SW_MAXIMIZE || flags) {);// beginif
+path();//
+set(CreateDialog(0, "STARTUPBANNER", MainWindow, (DLGPROC)_StartBanner););// 
+bend(});// endif
+branch(if (GotoLine) {);// beginif
+path();//
+set(PostMessage(MainWindow, WM_COMMAND, GOTO_LINE, GotoLine););// 
+bend(});// endif
+set(MSG msg;);// 
+loop(while (GetMessage(&msg, NULL, 0, 0)) {);// beginwhile
+set(TranslateMessage(&msg););// 
+set(DispatchMessage(&msg););// 
+lend(});// endwhile
+end(return msg.wParam;);//  + end 
+set(});//  + def pop  
+
+input(int APIENTRY __WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {);//  + in 
+set(char *cmdline, *flags = NULL;);// 
+set(hInst = hInstance;);// 
+branch(#ifdef DEMO);//  + #if 
+path();//
+set(MAX_DEMO_OBJECTS = NUM_OBJECTS_LIMIT;);// 
+bend(#endif);//  + #eif 
+branch(if (lpCmdLine && *lpCmdLine) {);// beginif
+path();//
+set(char* reg = NULL;);// 
+set(char* ptr = lpCmdLine;);// 
+set(char* d1 = strstr(lpCmdLine, ".ins "););// 
+branch(if (d1) {);// beginif
+path();//
+set(ptr = ++d1;);// 
+bend(});// endif
+set(d1 = strstr(lpCmdLine, ".ins\t"););// 
+branch(if (d1) {);// beginif
+path();//
+set(ptr = ++d1;);// 
+bend(});// endif
+set(flags = strchr(ptr, '-');// 
+set(strtok(ptr, "-");// 
+set(cmdline = lpCmdLine;    //  cmdline=strtok(lpCmdLine,"-");/  ;);//   cmdline=strtok(lpCmdLine,0);/  ;
+branch(if (flags) {);// beginif
+path();//
+set(reg = strtok(++flags, " "););// 
+bend(});// endif
+branch(if (cmdline && *cmdline != '-' && strlen(cmdline)));// beginif
+path({);//
+set(char path[300], *dir = strrchr(cmdline, '\\'););// 
+branch(if (dir) {);// beginif
+path();//
+set(*dir = NULL;);// 
+set(wsprintf(path, "%s\\", cmdline););// 
+set(SetCurrentDirectory(path););// 
+set(GetCurrentDirectory(255, Project.Env->CurrentDir););// 
+set(cmdline = ++dir;);// 
+bend(});// endif
+set(char* tok = cmdline + strlen(cmdline) - 1;);// 
+loop(while (tok > cmdline && iswhite(*tok)) {);// beginwhile
+set(*tok = NULL;);// 
+set(tok--;);// 
+lend(});// endwhile
+set(strcpy(InsectaFilename, cmdline););// 
+set(SetLongFileName(InsectaFilename););// 
+set(HWND H;);// 
+set(char* go = NULL;);// 
+set(int GotoLine = 0, GotoZoom = 0, GotoShiftX = 0, GotoShiftY = 0;);// 
+branch(if (cmdline && (go = strstr(reg, "Goto"))) {);// beginif
+path();//
+set(go += (strlen("Goto") + 1););// 
+set(sscanf(go, "%d %d %d", &GotoLine, &GotoZoom, GotoShiftX, GotoShiftY););// 
+set(*GotoMsg = NULL;);// 
+set(strncat(GotoMsg, &go[4], 298););// 
+set(// strcat(GotoMsg, "");;);//  strcat(GotoMsg, 0);;
+bend(});// endif
+branch(if ((H = FindWindow(APPNAME, InsectaFilename)) && !strstr(InsectaFilename, "Run")) {);// beginif
+path();//
+branch(if (GotoLine) {);// beginif
+path();//
+set(SendMessage(H, WM_COMMAND, GOTO_LINE, GotoLine););// 
+branch(if (GotoZoom > 0) {);// beginif
+path();//
+set(SendMessage(H, WM_COMMAND, ID_FONT_LARGER, 0););// 
+path(} else if (GotoZoom < 0) {);//  + pa 
+set(SendMessage(H, WM_COMMAND, ID_FONT_SMALLER, 0););// 
+path(} else {);//  + pa 
+bend(});// endif
+path(} else {);//  + pa 
+set(SetWindowPos(H, HWND_TOPMOST, 0, 0, 100, 100, SWP_NOMOVE | SWP_NOSIZE););// 
+set(SetActiveWindow(H););// 
+set(ShowWindow(H, SW_RESTORE););// 
+set(Sleep(50););// 
+set(SetWindowPos(H, HWND_NOTOPMOST, 0, 0, 100, 100, SWP_NOMOVE | SWP_NOSIZE););// 
+bend(});// endif
+end(return 0;);//  + end 
+path(} else {);//  + pa 
+bend(});// endif
+bend(});// endif
+set(InsectaRunMode = Startup.GetStartupCommand(InsectaFilename););// 
+branch(if (reg) {);// beginif
+path();//
+set(char* go = NULL;);// 
+branch(if (strstr(reg, "WorkSpaceFolder")) {);// beginif
+path();//
+set(char temp_buff[556];);// 
+set(char buff[256];);// 
+set(GetCurrentDirectory(255, buff););// 
+set(wsprintf(temp_buff, "Explorer.exe  %s", Project.Env->CurrentDir););// 
+set(WinExec(temp_buff, SW_NORMAL););// 
+end(return 0;);//  + end 
+bend(});// endif
+set(char cmd_buff[600];);// 
+branch(if (strstr(reg, "RunButton")) {);// beginif
+path();//
+set(InsectaRunMode = RUN_BUTTON_COMMAND;);// 
+set(wsprintf(cmd_buff, "RUN_BUTTON"););// 
+set(LoadExecuteKeyTool(InsectaFilename, cmd_buff););// 
+end(return 0;);//  + end 
+path(} else if (strstr(reg, "CompileButton")) {);//  + pa 
+set(InsectaRunMode = COMPILE_BUTTON_COMMAND;);// 
+set(wsprintf(cmd_buff, "COMPILE_BUTTON"););// 
+set(LoadExecuteKeyTool(InsectaFilename, cmd_buff););// 
+end(return 0;);//  + end 
+path(} else if (strstr(reg, "BuildButton")) {);//  + pa 
+set(InsectaRunMode = BUILD_BUTTON_COMMAND;);// 
+set(wsprintf(cmd_buff, "BUILD_BUTTON"););// 
+set(LoadExecuteKeyTool(InsectaFilename, cmd_buff););// 
+end(return 0;);//  + end 
+path(} else if (strstr(reg, "HelpButton")) {);//  + pa 
+set(InsectaRunMode = HELP_BUTTON_COMMAND;);// 
+set(wsprintf(cmd_buff, "HELP_BUTTON"););// 
+set(LoadExecuteKeyTool(InsectaFilename, cmd_buff););// 
+end(return 0;);//  + end 
+bend(});// endif
+branch(if (strstr(reg, "NewRegistration")) {);// beginif
+path();//
+set(nCmdShow = SW_SHOW;);// 
+set(strcpy(InsectaFilename, "untitled.ins"););// 
+set(ClearRegFlag = TRUE;);// 
+bend(});// endif
+branch(if (strstr(reg, "Demo")) {);// beginif
+path();//
+set(nCmdShow = SW_SHOW;);// 
+set(MAX_DEMO_OBJECTS = NUM_OBJECTS_LIMIT;);// 
+bend(});// endif
+branch(if (strstr(reg, "Run")) {);// beginif
+path();//
+set(InsectaRunMode = RUN_COMMAND;);// 
+set(flags = 0;);// 
+bend(});// endif
+branch(if (strstr(reg, "Applet")) {);// beginif
+path();//
+set(InsectaRunMode = APPLET_COMMAND;);// 
+path(} else {);//  + pa 
+set(InsectaRunMode = 0;);// 
+set(flags = 0;);// 
+bend(});// endif
+branch(if (strstr(reg, "Document")) {);// beginif
+path();//
+set(InsectaRunMode = DOCUMENT_COMMAND;);// 
+set(flags = 0;);// 
+bend(});// endif
+branch(if (strstr(reg, "Print")) {);// beginif
+path();//
+set(InsectaRunMode = PRINT_COMMAND;);// 
+set(flags = 0;);// 
+bend(});// endif
+branch(if (strstr(reg, "Open")) {);// beginif
+path();//
+set(InsectaRunMode = 0;);// 
+set(flags = 0;);// 
+bend(});// endif
+branch(if (strstr(reg, "Clone")) {);// beginif
+path();//
+set(InsectaRunMode = CLONE_COMMAND;);// 
+set(SetLongFileName("untitled.ins"););// 
+set(flags = 0;);// 
+set(// DEBUG // MessageBox( 0 ,InsectaFilename , " title ", MB_OK);;);//  DEBUG // MessageBox( 0 ,InsectaFilename , 0, MB_OK);;
+bend(});// endif
+bend(});// endif
+path(} else {);//  + pa 
+set(nCmdShow = SW_SHOW;);// 
+bend(});// endif
+branch(if (!hPrevInstance) {);// beginif
+path();//
+branch(if (!InitApplication(hInstance)) {);// beginif
+path();//
+end(return FALSE;);//  + end 
+bend(});// endif
+bend(});// endif
+set(RECT r = {CW_USEDEFAULT, CW_USEDEFAULT, 550, 500};);// 
+branch(if (!InitInstance(hInstance, nCmdShow, &r)) {);// beginif
+path();//
+end(return FALSE;);//  + end 
+bend(});// endif
+branch(#ifdef TIMELIMIT);//  + #if 
+path();//
+branch(if (RegObject.TimeExpired("April", "May", "62596")) {);// beginif
+path();//
+set(MessageBox(MainWindow,"The time limit on this evaluation copy has expired - FlowCoder will only run in DEMO mode now.);//
+set(Please contact FlowLynx at www.flowlynx.com to purchase a license.","Time Limit E);// 
+set(MAX_DEMO_OBJECTS=NUM_OBJECTS_LIMIT ;);// 
+bend(});// endif
+bend(#endif);//  + #eif 
+branch(if ((nCmdShow == SW_MAXIMIZE || flags) && (InsectaRunMode != APPLET_COMMAND || InsectaRunMode != RUN_COMMAND)) {);// beginif
+path();//
+set(CreateDialog(0, "STARTUPBANNER", MainWindow, (DLGPROC)_StartBanner););// 
+bend(});// endif
+set(MSG msg;);// 
+loop(while (GetMessage(&msg, NULL, 0, 0)) {);// beginwhile
+set(TranslateMessage(&msg););// 
+set(DispatchMessage(&msg););// 
+lend(});// endwhile
+end(return msg.wParam;);//  + end 
+end(});//  + pop  
+set();//   Export  Date: 01:10:00 PM - 10:May:2025;
+
+
+
+;INSECTA EMBEDDED SESSION INFORMATION
+; 255 16777215 65280 16777088 16711680 32896 8421504 0 255 255 16777215 4227327 2960640
+;    VFC99.cpp   //   ;
+; notepad.exe
+;INSECTA EMBEDDED ALTSESSION INFORMATION
+; 4294965285 68 2043 1701 0 200   1403   4294963588    C++.key  0
