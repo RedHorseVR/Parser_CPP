@@ -17,7 +17,8 @@ STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),
 	"for":     ("beginfor",    "endfor"),
 	"while":   ("beginwhile",  "endwhile"),
 	"switch":  ("beginswitch","endswitch"),
-	"function":("beginfunc",   "endfunc")}
+	"function":("beginfunc",   "endfunc"),
+	"class":("beginclass",   "endclass")}
 config = """
 	Language: Cpp
 	BasedOnStyle: Google
@@ -125,6 +126,8 @@ def add_structure_comments(code: str) -> str:
 			blocks.append(('while', i, None, None))
 		elif re.search(r'^\s*switch\s*\(', line):
 			blocks.append(('switch', i, None, None))
+		elif re.search(r'^\s*class\s*\(', line):
+			blocks.append(('class', i, None, None))
 		elif function_regex.match(line):
 			blocks.append(('function', i, None, None))
 			
@@ -452,7 +455,7 @@ def generate_VFC(input_string):
 		#--------------------------------------------------------------------------------------------------------- FIX
 		#--------------------------------------------------------------------------------------------------------- FIX
 		#--------------------------------------------------------------------------------------------------------- FIX
-		if   re.match( r'^if\b', code ) and type != 'branch' :
+		if   ( re.match( r'^if\b', code ) or  re.match( r'^\w* struct {', code ) ) and type != 'branch' :
 		
 			type = "branch"
 			if not re.match( r'^if\b.*;$', code ) :
@@ -502,7 +505,7 @@ def generate_VFC(input_string):
 			type = "loop"
 			fix_stack.append( 'lend' )
 			comment = ' + lo ' + comment
-		elif   re.match(function_type, code ) or re.match(method_type, code ) or re.match( r'\w*\s+APIENTRY' ,  code ) :
+		elif   re.match(function_type, code ) or re.match(method_type, code ) or re.match( r'\w*\s+APIENTRY' ,  code ) or re.match( r'^\s*class\b' ,  code ):
 			type = 'input'
 			if  not '}' in code  :
 			
@@ -517,7 +520,7 @@ def generate_VFC(input_string):
 			else:
 				comment = ' + sl in ' + comment
 				
-		elif   re.match( r'^}$', code ) and type == 'set' :
+		elif   re.match( r'^}', code ) and type == 'set' :
 			#try-catch-exception
 			try:
 				type = fix_stack.pop()
@@ -541,7 +544,26 @@ def generate_VFC(input_string):
 		
 			pass
 			
+		if re.match( r'\s*class\b' ,  code ):
+		
+			VFC += f"end(){VFCSEPERATOR}\n"
+			
+		if re.match( r'\};' ,  code ):
+		
+			VFC += f"bend(){VFCSEPERATOR}<--- end class\n"
+			type = 'end'
+			
+		if re.match( r'^(public|protected|private):' ,  code ) and type=='set':
+		
+			type = 'path'
+			
 		VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n'
+		if re.match( r'\s*class\b' ,  code ):
+		
+			VFC += f"branch(){VFCSEPERATOR}<---class\n"
+			VFC += f"path(){VFCSEPERATOR} --- \n"
+			
+			
 		if type == "branch":
 		
 			VFC += f"path(){VFCSEPERATOR}\n"
@@ -646,5 +668,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 03:52:31 PM - 09:May:2025.
+#  Export  Date: 12:02:10 PM - 14:May:2025.
 

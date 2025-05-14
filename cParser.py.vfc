@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cParser.py.vfc
-;  File Date : 03:52:31 PM - 09:May:2025
+;  File Date : 12:02:10 PM - 14:May:2025
 
 set();//"""
 set( );//Complete Arduino Structure Comment Parser
@@ -24,7 +24,8 @@ path(STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),);//// //
 set("for":     ("beginfor",    "endfor"),);// 
 set("while":   ("beginwhile",  "endwhile"),);// 
 set("switch":  ("beginswitch","endswitch"),);// 
-set("function":("beginfunc",   "endfunc")});// 
+set("function":("beginfunc",   "endfunc"),);// 
+set("class":("beginclass",   "endclass")});// 
 path(config = """);//// //
 set(Language: Cpp);// 
 set(BasedOnStyle: Google);// 
@@ -135,6 +136,8 @@ path(elif re.search(r'^\s*while\s*\(', line):);// beginelif
 set(blocks.append(('while', i, None, None)));// 
 path(elif re.search(r'^\s*switch\s*\(', line):);// beginelif
 set(blocks.append(('switch', i, None, None)));// 
+path(elif re.search(r'^\s*class\s*\(', line):);// beginelif
+set(blocks.append(('class', i, None, None)));// 
 path(elif function_regex.match(line):);// beginelif
 set(blocks.append(('function', i, None, None)));// 
 set();// endlif
@@ -464,7 +467,7 @@ set(type = get_VFC_type(code, comment));//
 set(#--------------------------------------------------------------------------------------------------------- FIX);//#--------------------------------------------------------------------------------------------------------- FIX
 set(#--------------------------------------------------------------------------------------------------------- FIX);//#--------------------------------------------------------------------------------------------------------- FIX
 set(#--------------------------------------------------------------------------------------------------------- FIX);//#--------------------------------------------------------------------------------------------------------- FIX
-branch(if   re.match( r'^if\b', code ) and type != 'branch' :);//
+branch(if   ( re.match( r'^if\b', code ) or  re.match( r'^\w* struct {', code ) ) and type != 'branch' :);//if   re.match( r'^if\b', code ) and type != 'branch' :
 path();//
 set(type = "branch");// 
 branch(if not re.match( r'^if\b.*;$', code ) :);// 
@@ -514,7 +517,7 @@ path(elif ( re.match( r'^while\b', code ) or re.match( r'^for\b', code ) or re.m
 set(type = "loop");// 
 set(fix_stack.append( 'lend' ));// 
 set(comment = ' + lo ' + comment);//
-path(elif   re.match(function_type, code ) or re.match(method_type, code ) or re.match( r'\w*\s+APIENTRY' ,  code ) :);//
+path(elif   re.match(function_type, code ) or re.match(method_type, code ) or re.match( r'\w*\s+APIENTRY' ,  code ) or re.match( r'^\s*class\b' ,  code ):);//
 set(type = 'input');// 
 branch(if  not '}' in code  :);//
 path();//
@@ -529,7 +532,7 @@ bend( );//
 path(else: );//
 set(comment = ' + sl in ' + comment);//
 bend( );//
-path(elif   re.match( r'^}$', code ) and type == 'set' :);//
+path(elif   re.match( r'^}', code ) and type == 'set' :);//elif   re.match( r'^}$', code ) and type == 'set' :
 branch(#try-catch-exception);//
 path(try:);//
 set(type = fix_stack.pop());// 
@@ -553,7 +556,26 @@ branch(if type == "input" :);//
 path();//
 output( pass);////VFC += f"end(){VFCSEPERATOR}\n"//
 bend();// endif
+branch(if re.match( r'\s*class\b' ,  code ):);// 
+path();//
+set(VFC += f"end(){VFCSEPERATOR}\n");// 
+bend();// endif
+branch(if re.match( r'\};' ,  code ):);// 
+path();//
+set(VFC += f"bend(){VFCSEPERATOR}<--- end class\n");// 
+set(type = 'end');//
+bend();// endif
+branch(if re.match( r'^(public|protected|private):' ,  code ) and type=='set':);// 
+path();//
+set(type = 'path');//
+bend();// endif
 output(VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n');//// //
+branch(if re.match( r'\s*class\b' ,  code ):);// 
+path();//
+set(VFC += f"branch(){VFCSEPERATOR}<---class\n");// 
+set(VFC += f"path(){VFCSEPERATOR} --- \n");// 
+set( );//VFC += f"path(){VFCSEPERATOR} --- \n"
+bend();// endif
 branch(if type == "branch":);// beginif
 path();//
 set(VFC += f"path(){VFCSEPERATOR}\n");// 
@@ -667,4 +689,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 4294967292 4294967292 1928 1040 463 128   516   4294953586    python.key  0
+; 619 163 1928 842 451 99   647   4294956580    python.key  0

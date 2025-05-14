@@ -8,4 +8,4 @@ for %%F in (%*) do (
     REM some_command "%%F"
 )
 echo Done!
-pause
+
