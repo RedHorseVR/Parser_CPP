@@ -81,14 +81,12 @@ def format_code(code: str) -> str:
 		
 		
 		
-		script_dir = os.path.dirname(os.path.abspath(__file__))
-		print( "--->" + code_file )
-		print("Current script directory:", script_dir)
-		clang_format_path = r"clang-format"
-		clang_yaml_path = os.path.join( script_dir, 'vfc.yaml' )
+		clang_format_path = r"C:\\Users\\lopezl10\\AppData\\Roaming\\Python\\Python312\\Scripts\\clang-format"
+		clang_yaml_path = r"C:\\Users\\lopezl10\\AppData\\Local\\RedHorseVR\\C2VFC_parser\\vfc.yaml"
 		stream = os.popen(f'"{clang_format_path}" -style=file:"{clang_yaml_path}" "{code_file}"')
 		
 		formatted = stream.read()
+		print( "--->" + code_file )
 		print( "output: [ " ,  formatted + "]" )
 		return formatted
 	except Exception as e:
@@ -670,9 +668,5 @@ if __name__ == '__main__':
 	main()
 	
 
-<<<<<<< HEAD
-#  Export  Date: 12:02:10 PM - 14:May:2025.
-=======
-#  Export  Date: 01:18:35 PM - 10:May:2025.
->>>>>>> 6804cab563fa9ce4e4406fb0c03f869134e518e6
+#  Export  Date: 12:08:01 PM - 14:May:2025.
 
