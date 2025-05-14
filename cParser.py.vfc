@@ -2,7 +2,11 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cParser.py.vfc
+<<<<<<< HEAD
 ;  File Date : 12:02:10 PM - 14:May:2025
+=======
+;  File Date : 01:18:35 PM - 10:May:2025
+>>>>>>> 6804cab563fa9ce4e4406fb0c03f869134e518e6
 
 set();//"""
 set( );//Complete Arduino Structure Comment Parser
@@ -90,12 +94,14 @@ path();//
 set( );//config_path = create_clang_config()
 set( );//formatted = proc.stdout.decode('utf-8')
 set( );//os.unlink(config_path)
-generic(clang_format_path = r"C:\\Users\\lopezl10\\AppData\\Roaming\\Python\\Python312\\Scripts\\clang-format");// ////
-generic(clang_yaml_path = r"C:\\Users\\lopezl10\\AppData\\Local\\RedHorseVR\\C2VFC_parser\\vfc.yaml");//
+generic(script_dir = os.path.dirname(os.path.abspath(__file__)));// ////
+output(print( "--->" + code_file ));//// //////
+output(print("Current script directory:", script_dir));//// //////
+generic(clang_format_path = r"clang-format");// ////
+generic(clang_yaml_path = os.path.join( script_dir, 'vfc.yaml' ));//
 generic(stream = os.popen(f'"{clang_format_path}" -style=file:"{clang_yaml_path}" "{code_file}"'));//stream = os.popen(f'"{clang_format_path}" "{code_file}"')
 set();//
 generic(formatted = stream.read());// ////
-output(print( "--->" + code_file ));//// //////
 output(print( "output: [ " ,  formatted + "]" ));//// //////
 process(return formatted);//return indent_else_blocks(formatted)
 path(except Exception as e:);// 
@@ -525,11 +531,11 @@ branch(if  not r';' in code  :);//
 path();//
 set(fix_stack.append( 'end' ));// 
 set(comment = ' + in ' + comment);//
-path(else: );//
+path(else:);//
 set(type = 'process');// 
 set(comment = ' + pr in ' + comment);//
 bend( );//
-path(else: );//
+path(else:);//
 set(comment = ' + sl in ' + comment);//
 bend( );//
 path(elif   re.match( r'^}', code ) and type == 'set' :);//elif   re.match( r'^}$', code ) and type == 'set' :
@@ -689,4 +695,8 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
+<<<<<<< HEAD
 ; 619 163 1928 842 451 99   647   4294956580    python.key  0
+=======
+; 321 281 1472 1075 463 128   660   4294964534    python.key  0
+>>>>>>> 6804cab563fa9ce4e4406fb0c03f869134e518e6
