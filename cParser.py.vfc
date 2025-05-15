@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cParser.py.vfc
-;  File Date : 12:08:01 PM - 14:May:2025
+;  File Date : 10:51:26 AM - 15:May:2025
 
 set();//"""
 set( );//Complete Arduino Structure Comment Parser
@@ -452,6 +452,8 @@ input(def generate_VFC(input_string):);// beginfunc
 set(strings = input_string.split("\n"));// 
 set(VFC = '');// 
 set(fix_stack = []);// 
+set(CLASS_TYPE = r'^\s*(?:enum\s+|struct\s+|interface\s+|abstract\s+)?class\s+\w+\b(?!.*;\s*$)');//CLASS_TYPE = r'^\s*(\w\s)*class\b'
+generic(STRUCT_ENUM_TYPE = r'^\s*(typedef\s+)?(struct|enum(?!\s+class))\s+\w+\b(?!.*;\s*$)');// ////
 set(function_type = r'(?:void|int|float|double|char|long|short|bool|inline|static|extern|APIENTRY|\w|\*|&)*\s+\w+\s*\(');//
 set(method_type = r'\b[\w\s&\*]+::');//method_type = r'\b[\w\s&\*]+::\w+\s*\([^)]*\)\s*\{'
 set(prev_type = 'set');//
@@ -467,7 +469,7 @@ set(type = get_VFC_type(code, comment));//
 set(#--------------------------------------------------------------------------------------------------------- FIX);//#--------------------------------------------------------------------------------------------------------- FIX
 set(#--------------------------------------------------------------------------------------------------------- FIX);//#--------------------------------------------------------------------------------------------------------- FIX
 set(#--------------------------------------------------------------------------------------------------------- FIX);//#--------------------------------------------------------------------------------------------------------- FIX
-branch(if   ( re.match( r'^if\b', code ) or  re.match( r'^\w* struct {', code ) ) and type != 'branch' :);//if   re.match( r'^if\b', code ) and type != 'branch' :
+branch(if   ( re.match( r'^if\b', code ) or  re.match( STRUCT_ENUM_TYPE , code ) ) and type != 'branch' :);// 
 path();//
 set(type = "branch");// 
 branch(if not re.match( r'^if\b.*;$', code ) :);// 
@@ -517,7 +519,7 @@ path(elif ( re.match( r'^while\b', code ) or re.match( r'^for\b', code ) or re.m
 set(type = "loop");// 
 set(fix_stack.append( 'lend' ));// 
 set(comment = ' + lo ' + comment);//
-path(elif   re.match(function_type, code ) or re.match(method_type, code ) or re.match( r'\w*\s+APIENTRY' ,  code ) or re.match( r'^\s*class\b' ,  code ):);//
+path(elif   re.match(function_type, code ) or re.match(method_type, code ) or re.match( r'\w*\s+APIENTRY' ,  code ) or re.match( CLASS_TYPE,  code ):);//
 set(type = 'input');// 
 branch(if  not '}' in code  :);//
 path();//
@@ -530,6 +532,11 @@ set(type = 'process');//
 set(comment = ' + pr in ' + comment);//
 bend( );//
 path(else:);//
+branch(if   re.match( r'.*;$', code ) :);//
+path( );//
+set(type = 'process');// 
+path(else:);//
+bend( );//
 set(comment = ' + sl in ' + comment);//
 bend( );//
 path(elif   re.match( r'^}', code ) and type == 'set' :);//elif   re.match( r'^}$', code ) and type == 'set' :
@@ -556,7 +563,7 @@ branch(if type == "input" :);//
 path();//
 output( pass);////VFC += f"end(){VFCSEPERATOR}\n"//
 bend();// endif
-branch(if re.match( r'\s*class\b' ,  code ):);// 
+branch(if re.match( CLASS_TYPE ,  code ):);//// if re.match( r'\s*class\b' ,  code ):////
 path();//
 set(VFC += f"end(){VFCSEPERATOR}\n");// 
 bend();// endif
@@ -570,7 +577,7 @@ path();//
 set(type = 'path');//
 bend();// endif
 output(VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n');//// //
-branch(if re.match( r'\s*class\b' ,  code ):);// 
+branch(if re.match( CLASS_TYPE ,  code ):);//// if re.match( r'\s*class\b' ,  code ):////
 path();//
 set(VFC += f"branch(){VFCSEPERATOR}<---class\n");// 
 set(VFC += f"path(){VFCSEPERATOR} --- \n");// 
@@ -689,4 +696,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 619 163 1928 842 463 99   647   4294956582    python.key  0
+; 508 327 3315 765 463 139   4294960248   4294951864    python.key  0

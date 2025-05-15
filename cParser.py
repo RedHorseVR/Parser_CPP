@@ -440,6 +440,8 @@ def generate_VFC(input_string):
 	strings = input_string.split("\n")
 	VFC = ''
 	fix_stack = []
+	CLASS_TYPE = r'^\s*(?:enum\s+|struct\s+|interface\s+|abstract\s+)?class\s+\w+\b(?!.*;\s*$)'
+	STRUCT_ENUM_TYPE = r'^\s*(typedef\s+)?(struct|enum(?!\s+class))\s+\w+\b(?!.*;\s*$)'
 	function_type = r'(?:void|int|float|double|char|long|short|bool|inline|static|extern|APIENTRY|\w|\*|&)*\s+\w+\s*\('
 	method_type = r'\b[\w\s&\*]+::'
 	prev_type = 'set'
@@ -455,7 +457,7 @@ def generate_VFC(input_string):
 		#--------------------------------------------------------------------------------------------------------- FIX
 		#--------------------------------------------------------------------------------------------------------- FIX
 		#--------------------------------------------------------------------------------------------------------- FIX
-		if   ( re.match( r'^if\b', code ) or  re.match( r'^\w* struct {', code ) ) and type != 'branch' :
+		if   ( re.match( r'^if\b', code ) or  re.match( STRUCT_ENUM_TYPE , code ) ) and type != 'branch' :
 		
 			type = "branch"
 			if not re.match( r'^if\b.*;$', code ) :
@@ -505,7 +507,7 @@ def generate_VFC(input_string):
 			type = "loop"
 			fix_stack.append( 'lend' )
 			comment = ' + lo ' + comment
-		elif   re.match(function_type, code ) or re.match(method_type, code ) or re.match( r'\w*\s+APIENTRY' ,  code ) or re.match( r'^\s*class\b' ,  code ):
+		elif   re.match(function_type, code ) or re.match(method_type, code ) or re.match( r'\w*\s+APIENTRY' ,  code ) or re.match( CLASS_TYPE,  code ):
 			type = 'input'
 			if  not '}' in code  :
 			
@@ -518,6 +520,11 @@ def generate_VFC(input_string):
 					comment = ' + pr in ' + comment
 					
 			else:
+				if   re.match( r'.*;$', code ) :
+				
+					type = 'process'
+				else:
+					
 				comment = ' + sl in ' + comment
 				
 		elif   re.match( r'^}', code ) and type == 'set' :
@@ -544,7 +551,7 @@ def generate_VFC(input_string):
 		
 			pass
 			
-		if re.match( r'\s*class\b' ,  code ):
+		if re.match( CLASS_TYPE ,  code ):
 		
 			VFC += f"end(){VFCSEPERATOR}\n"
 			
@@ -558,7 +565,7 @@ def generate_VFC(input_string):
 			type = 'path'
 			
 		VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n'
-		if re.match( r'\s*class\b' ,  code ):
+		if re.match( CLASS_TYPE ,  code ):
 		
 			VFC += f"branch(){VFCSEPERATOR}<---class\n"
 			VFC += f"path(){VFCSEPERATOR} --- \n"
@@ -668,5 +675,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 12:08:01 PM - 14:May:2025.
+#  Export  Date: 10:51:26 AM - 15:May:2025.
 
