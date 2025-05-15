@@ -2,12 +2,9 @@ echo off
 set BAT_FILE_PATH=%~dp0
 
 set BAT_FILE_PATH=C:\Users\lopezl10\AppData\Local\RedHorseVR\C2VFC_parser
-=======
-set BAT_FILE_PATH="C:\Users\luisr\Arduino_VFC_parser"
 
-echo The absolute path of this batch file is: %BAT_FILE_PATH%
+secho The absolute path of this batch file is: %BAT_FILE_PATH%
 
-SET VFCTOOLPATH=C:\VFC1.0
 SET COMMENTPARSERPATH=%BAT_FILE_PATH%
 
 
@@ -27,12 +24,6 @@ echo .
 set filepath=%~dp1
 echo filepath : %filepath%
 
- 
-cmd /c python "%COMMENTPARSERPATH%\cParser.py" "%1" -o %filepath%_%filename%
-
-start vfc2000 %1.vfc -Reload
-
-=======
 echo run ---
 
 	cmd /c python %COMMENTPARSERPATH%\cParser.py %1 -o %filepath%_%filename%
