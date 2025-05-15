@@ -524,6 +524,7 @@ def generate_VFC(input_string):
 				
 					type = 'process'
 				else:
+					pass
 					
 				comment = ' + sl in ' + comment
 				
@@ -675,5 +676,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 10:51:26 AM - 15:May:2025.
+#  Export  Date: 12:51:25 PM - 15:May:2025.
 
