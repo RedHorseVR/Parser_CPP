@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cParser.py.vfc
-;  File Date : 12:51:25 PM - 15:May:2025
+;  File Date : 02:27:55 PM - 15:May:2025
 
 set();//"""
 set( );//Complete Arduino Structure Comment Parser
@@ -453,7 +453,7 @@ set(strings = input_string.split("\n"));//
 set(VFC = '');// 
 set(fix_stack = []);// 
 set(CLASS_TYPE = r'^\s*(?:enum\s+|struct\s+|interface\s+|abstract\s+)?class\s+\w+\b(?!.*;\s*$)');//CLASS_TYPE = r'^\s*(\w\s)*class\b'
-generic(STRUCT_ENUM_TYPE = r'^\s*(typedef\s+)?(struct|enum(?!\s+class))\s+\w+\b(?!.*;\s*$)');// ////
+generic(STRUCT_ENUM_TYPE = r'^\s*(typedef\s+)?(struct|enum(?!\s+class))\s+\w+\b(?!.*;\s*$)');// 
 set(function_type = r'(?:void|int|float|double|char|long|short|bool|inline|static|extern|APIENTRY|\w|\*|&)*\s+\w+\s*\(');//
 set(method_type = r'\b[\w\s&\*]+::');//method_type = r'\b[\w\s&\*]+::\w+\s*\([^)]*\)\s*\{'
 set(prev_type = 'set');//
@@ -697,4 +697,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 411 171 3315 765 463 139   4294960248   4294951864    python.key  0
+; 4294965568 919 3315 533 437 139   749   4294952599    python.key  0
