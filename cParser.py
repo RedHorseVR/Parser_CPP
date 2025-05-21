@@ -341,6 +341,8 @@ ends = [
 	]
 events = [
 	"#include",
+	"#define",
+	"using",
 	"delay",
 	]
 outputs = [
@@ -437,6 +439,7 @@ def get_VFC_type(code : str, line: str) -> Optional[str]:
 	return "set"
 	
 def generate_VFC(input_string):
+	DEBUG = False
 	strings = input_string.split("\n")
 	VFC = ''
 	fix_stack = []
@@ -464,49 +467,49 @@ def generate_VFC(input_string):
 			
 				fix_stack.append( 'bend' )
 				
-			comment = ' + br ' + comment
+			if DEBUG :  comment = ' + br ' + comment
 		elif   code == '{' and (prev_type == 'path' or 'case' in prev_code )  :
 			fix_stack.append( 'end' )
-			comment = ' + p{ ' + comment
+			if DEBUG : comment= ' + p{ ' + comment
 		elif   '#pragma' in code  :
 			type = 'event'
-			comment = ' +ev ' + comment
+			if DEBUG : comment= ' +ev ' + comment
 		elif   type == 'path' and 'case' in prev_code  :
 			type = 'set'
-			comment = ' +cp ' + comment
+			if DEBUG : comment= ' +cp ' + comment
 		elif   re.match( r'^try\b', code ) and type == 'set' :
 			type = 'branch'
 			fix_stack.append( 'bend' )
-			comment = ' + try ' + comment
+			if DEBUG : comment= ' + try ' + comment
 		elif   re.match( r".*\bcase\b" , code )  :
 			type = 'path'
-			comment = ' + case ' + comment
+			if DEBUG : comment= ' + case ' + comment
 		elif   re.match( r".*\bcatch\b" , code )  :
 			type = 'path'
-			comment = ' + cat ' + comment
+			if DEBUG : comment= ' + cat ' + comment
 		elif   re.match( r'^#if', code ) and type == 'set' :
 			type = 'branch'
-			comment = ' + #if ' + comment
+			if DEBUG : comment= ' + #if ' + comment
 		elif   re.match( r'^#end', code ) and type == 'set' :
 			type = 'bend'
-			comment = ' + #eif ' + comment
+			if DEBUG : comment= ' + #eif ' + comment
 		elif   re.match( r'^return\b', code ) and type == 'set' :
 			type = 'end'
-			comment = ' + end ' + comment
+			if DEBUG : comment= ' + end ' + comment
 		elif   re.match( r'} while\b', code ) and type == 'set' :
 			type = "lend"
-			comment = ' + dw ' + comment
+			if DEBUG : comment= ' + dw ' + comment
 		elif   re.match( r'^default\b', code )  or  re.match( r'^#else', code )   :
 			type = "path"
 			
-			comment = ' + def ' + comment
+			if DEBUG : comment= ' + def ' + comment
 		elif   re.match( r'\} else\b', code ) and type != 'path' :
 			type = "path"
-			comment = ' + pa ' + comment
+			if DEBUG : comment= ' + pa ' + comment
 		elif ( re.match( r'^while\b', code ) or re.match( r'^for\b', code ) or re.match( r'^do\b', code )  )  and type != 'loop' :
 			type = "loop"
 			fix_stack.append( 'lend' )
-			comment = ' + lo ' + comment
+			if DEBUG : comment= ' + lo ' + comment
 		elif   re.match(function_type, code ) or re.match(method_type, code ) or re.match( r'\w*\s+APIENTRY' ,  code ) or re.match( CLASS_TYPE,  code ):
 			type = 'input'
 			if  not '}' in code  :
@@ -514,10 +517,10 @@ def generate_VFC(input_string):
 				if  not r';' in code  :
 				
 					fix_stack.append( 'end' )
-					comment = ' + in ' + comment
+					if DEBUG : comment= ' + in ' + comment
 				else:
 					type = 'process'
-					comment = ' + pr in ' + comment
+					if DEBUG : comment= ' + pr in ' + comment
 					
 			else:
 				if   re.match( r'.*;$', code ) :
@@ -526,16 +529,16 @@ def generate_VFC(input_string):
 				else:
 					pass
 					
-				comment = ' + sl in ' + comment
+				if DEBUG : comment= ' + sl in ' + comment
 				
 		elif   re.match( r'^}', code ) and type == 'set' :
 			#try-catch-exception
 			try:
 				type = fix_stack.pop()
-				comment = ' + pop  ' + comment
+				if DEBUG : comment= ' + pop  ' + comment
 			except :
 				type = 'set'
-				comment = ' + def pop  ' + comment
+				if DEBUG : comment= ' + def pop  ' + comment
 				
 			
 		prev_type = type
@@ -676,5 +679,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 02:27:55 PM - 15:May:2025.
+#  Export  Date: 10:07:13 AM - 21:May:2025.
 

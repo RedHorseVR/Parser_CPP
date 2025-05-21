@@ -1,7 +1,7 @@
 echo off
 set BAT_FILE_PATH=%~dp0
 
-set BAT_FILE_PATH=C:\Users\lopezl10\AppData\Local\RedHorseVR\C2VFC_parser
+rem set BAT_FILE_PATH=C:\Users\lopezl10\AppData\Local\RedHorseVR\C2VFC_parser
 
 secho The absolute path of this batch file is: %BAT_FILE_PATH%
 
@@ -31,4 +31,6 @@ echo .
 
 start vfc2000 %1.vfc -Reload
 
-pause
+
+ 
+EXIT

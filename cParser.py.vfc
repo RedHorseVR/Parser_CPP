@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cParser.py.vfc
-;  File Date : 02:27:55 PM - 15:May:2025
+;  File Date : 10:07:13 AM - 21:May:2025
 
 set();//"""
 set( );//Complete Arduino Structure Comment Parser
@@ -345,6 +345,8 @@ set("break",);//
 set(]);// 
 path(events = [);//// //
 set("#include",);// 
+set("#define",);// 
+set("using",);// 
 set("delay",);// 
 set(]);// 
 path(outputs = [);//// //
@@ -449,6 +451,7 @@ set(return "set");//
 end();// endfunc
 
 input(def generate_VFC(input_string):);// beginfunc
+output(DEBUG = False);//DEBUG = True
 set(strings = input_string.split("\n"));// 
 set(VFC = '');// 
 set(fix_stack = []);// 
@@ -476,49 +479,49 @@ branch(if not re.match( r'^if\b.*;$', code ) :);//
 path();//
 set(fix_stack.append( 'bend' ));// 
 bend();// endif
-set(comment = ' + br ' + comment);//
+set(if DEBUG :  comment = ' + br ' + comment);//
 path(elif   code == '{' and (prev_type == 'path' or 'case' in prev_code )  :);//elif   code == '{'   :
 set(fix_stack.append( 'end' ));// 
-set(comment = ' + p{ ' + comment);//
+set(if DEBUG : comment= ' + p{ ' + comment);//
 path(elif   '#pragma' in code  :);// 
 set(type = 'event');// 
-set(comment = ' +ev ' + comment);//
+set(if DEBUG : comment= ' +ev ' + comment);//
 path(elif   type == 'path' and 'case' in prev_code  :);//collapse paths 
 set(type = 'set');//collapse paths  
-set(comment = ' +cp ' + comment);//
+set(if DEBUG : comment= ' +cp ' + comment);//
 path(elif   re.match( r'^try\b', code ) and type == 'set' :);//
 set(type = 'branch');// 
 set(fix_stack.append( 'bend' ));// 
-set(comment = ' + try ' + comment);//
+set(if DEBUG : comment= ' + try ' + comment);//
 path(elif   re.match( r".*\bcase\b" , code )  :);//elif   re.match( r'} catch (const exception& e) {', code ) and type == 'set' :
 set(type = 'path');// 
-set(comment = ' + case ' + comment);//
+set(if DEBUG : comment= ' + case ' + comment);//
 path(elif   re.match( r".*\bcatch\b" , code )  :);//elif   re.match( r'} catch (const exception& e) {', code ) and type == 'set' :
 set(type = 'path');// 
-set(comment = ' + cat ' + comment);//
+set(if DEBUG : comment= ' + cat ' + comment);//
 path(elif   re.match( r'^#if', code ) and type == 'set' :);//
 set(type = 'branch');// 
-set(comment = ' + #if ' + comment);//
+set(if DEBUG : comment= ' + #if ' + comment);//
 path(elif   re.match( r'^#end', code ) and type == 'set' :);//
 set(type = 'bend');// 
-set(comment = ' + #eif ' + comment);//
+set(if DEBUG : comment= ' + #eif ' + comment);//
 path(elif   re.match( r'^return\b', code ) and type == 'set' :);//
 set(type = 'end');// 
-set(comment = ' + end ' + comment);//
+set(if DEBUG : comment= ' + end ' + comment);//
 path(elif   re.match( r'} while\b', code ) and type == 'set' :);//
 set(type = "lend");// 
-set(comment = ' + dw ' + comment);//
+set(if DEBUG : comment= ' + dw ' + comment);//
 path(elif   re.match( r'^default\b', code )  or  re.match( r'^#else', code )   :);//elif   re.match( r'^case\b.*\{$', code )  :
 set(type = "path");// 
 set( );//fix_stack.append( 'end' )
-set(comment = ' + def ' + comment);//
+set(if DEBUG : comment= ' + def ' + comment);//
 path(elif   re.match( r'\} else\b', code ) and type != 'path' :);//
 set(type = "path");// 
-set(comment = ' + pa ' + comment);//
+set(if DEBUG : comment= ' + pa ' + comment);//
 path(elif ( re.match( r'^while\b', code ) or re.match( r'^for\b', code ) or re.match( r'^do\b', code )  )  and type != 'loop' :);//
 set(type = "loop");// 
 set(fix_stack.append( 'lend' ));// 
-set(comment = ' + lo ' + comment);//
+set(if DEBUG : comment= ' + lo ' + comment);//
 path(elif   re.match(function_type, code ) or re.match(method_type, code ) or re.match( r'\w*\s+APIENTRY' ,  code ) or re.match( CLASS_TYPE,  code ):);//
 set(type = 'input');// 
 branch(if  not '}' in code  :);//
@@ -526,28 +529,28 @@ path();//
 branch(if  not r';' in code  :);//
 path();//
 set(fix_stack.append( 'end' ));// 
-set(comment = ' + in ' + comment);//
+set(if DEBUG : comment= ' + in ' + comment);//
 path(else:);//
 set(type = 'process');// 
-set(comment = ' + pr in ' + comment);//
+set(if DEBUG : comment= ' + pr in ' + comment);//
 bend( );//
 path(else:);//
 branch(if   re.match( r'.*;$', code ) :);//
 path( );//
 set(type = 'process');// 
 path(else:);//
-output(pass );//
+output(pass);//
 bend( );//
-set(comment = ' + sl in ' + comment);//
+set(if DEBUG : comment= ' + sl in ' + comment);//
 bend( );//
 path(elif   re.match( r'^}', code ) and type == 'set' :);//elif   re.match( r'^}$', code ) and type == 'set' :
 branch(#try-catch-exception);//
 path(try:);//
 set(type = fix_stack.pop());// 
-set(comment = ' + pop  ' + comment);//
+set(if DEBUG : comment= ' + pop  ' + comment);//
 path(except :);//
 set(type = 'set');// type = 'bend'
-set(comment = ' + def pop  ' + comment);//
+set(if DEBUG : comment= ' + def pop  ' + comment);//
 bend( );//
 bend( );//
 set(prev_type = type);//
@@ -697,4 +700,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 4294965568 919 3315 533 437 139   749   4294952599    python.key  0
+; 491 850 2480 943 437 128   473   4294957891    python.key  0
