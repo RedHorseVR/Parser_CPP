@@ -5,7 +5,5 @@ IF NOT EXIST %1.vfc (
     echo parsing %1 to vfc...
     cParse.bat %1
 )
-
+rem start vfc2000 %1.vfc -Reload
 start vfc2000 %1.vfc -Goto %2
-
-pause
