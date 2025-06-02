@@ -18,8 +18,9 @@ for %%F in (%*) do (
 
 	python %CD%\cParser.py %%F
 
-	start VFC2000 %%F.vfc
+	start VFC2000 %%F.vfc -Reload
+	timeout /T 2
 )
 echo Done!
 
-PAUSE
+rem PAUSE
