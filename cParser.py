@@ -568,7 +568,30 @@ def generate_VFC(input_string):
 		
 			type = 'path'
 			
-		VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n'
+		if DEBUG :
+		
+			VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n'
+		else:
+			token_list = [
+			
+				"beginfor", "endfor",
+				"beginwhile", "endwhile",
+				"beginswitch", "endswitch",
+				"beginfunc", "endfunc",
+				"beginclass", "endclass",
+				"beginmethod", "endmethod" ,
+			
+				"begininput", "endinput",
+				"beginif", "endif",
+				"begintry", "endtry",
+				"beginwith", "endwith",
+				"beginbranch", "endbranch",
+				"beginloop" , "endloop"
+				]
+			pattern = r'^(' + '|'.join(re.escape(token) for token in token_list) + r')\s*'
+			comment = re.sub(pattern, '', comment.strip() )
+			VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n'
+			
 		if re.match( CLASS_TYPE ,  code ):
 		
 			VFC += f"branch(){VFCSEPERATOR}<---class\n"
@@ -679,5 +702,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 10:07:13 AM - 21:May:2025.
+#  Export  Date: 03:33:04 PM - 03:Jun:2025.
 

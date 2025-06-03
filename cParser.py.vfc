@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cParser.py.vfc
-;  File Date : 10:07:13 AM - 21:May:2025
+;  File Date : 03:33:04 PM - 03:Jun:2025
 
 set();//"""
 set( );//Complete Arduino Structure Comment Parser
@@ -580,7 +580,30 @@ branch(if re.match( r'^(public|protected|private):' ,  code ) and type=='set':);
 path();//
 set(type = 'path');//
 bend();// endif
+branch(if DEBUG :);//
+path( );//
 output(VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n');//// //
+path(else: );//
+branch(token_list = [);// 
+path();//
+generic("beginfor", "endfor", );// ////
+generic("beginwhile", "endwhile", );// ////
+generic("beginswitch", "endswitch", );// ////
+generic("beginfunc", "endfunc", );// ////
+generic("beginclass", "endclass", );// ////
+generic("beginmethod", "endmethod" ,);// ////
+path();//
+generic("begininput", "endinput",);// ////
+generic("beginif", "endif",);// ////
+generic("begintry", "endtry",);// ////
+generic("beginwith", "endwith",);// ////
+generic("beginbranch", "endbranch",);// ////
+generic("beginloop" , "endloop");// ////
+bend(] );//// //////
+set(pattern = r'^(' + '|'.join(re.escape(token) for token in token_list) + r')\s*');// ////
+generic(comment = re.sub(pattern, '', comment.strip() ));// ////
+output(VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n');//// //
+bend( );//
 branch(if re.match( CLASS_TYPE ,  code ):);//// if re.match( r'\s*class\b' ,  code ):////
 path();//
 set(VFC += f"branch(){VFCSEPERATOR}<---class\n");// 
@@ -700,4 +723,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 491 850 2480 943 437 128   473   4294957891    python.key  0
+; 328 342 1736 1590 582 128   652   4294951594    python.key  0
