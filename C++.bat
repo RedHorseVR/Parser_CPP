@@ -12,15 +12,20 @@ for %%F in (%*) do (
     	set filename=%%~nxF
     	echo root: !filename!
     	echo Folder: %%~dpF
-    	echo -----------------------
+		set backup=%%~dpF_%%~nxF
+		set file=%%~dpF%%~nxF
+
+    	echo -------------- !file! ... !backup!
     
-    	copy %%F %%~dpF\_!filename!
+    	copy "!file!" "!backup!"
+	echo ...
+	ECHO python %~dp0cppParser.py "!file!"
 
-	python %CD%\cParser.py %%F
+	python %~dp0cppParser.py "!file!"
 
-	start VFC2000 %%F.vfc -Reload
-	timeout /T 2
+	start VFC2000 !file!.vfc -Reload
+	timeout /T 10
 )
 echo Done!
 
-rem PAUSE
+ PAUSE
