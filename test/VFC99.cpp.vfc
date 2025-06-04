@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : VFC99.cpp.vfc
-;  File Date : 01:18:00 PM - 10:May:2025
+;  File Date : 01:21:32 PM - 10:May:2025
 
 set(/* includes */);// 
 event(#include <windows.h>);// 
@@ -645,7 +645,7 @@ set(DispatchMessage(&msg););//
 lend(});// endwhile
 end(return msg.wParam;);//  + end 
 end(});//  + pop  
-set();//   Export  Date: 01:10:00 PM - 10:May:2025;
+set();//   Export  Date: 01:18:00 PM - 10:May:2025;
 
 
 
@@ -654,4 +654,4 @@ set();//   Export  Date: 01:10:00 PM - 10:May:2025;
 ;    VFC99.cpp   //   ;
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 4294965285 68 2043 1701 0 200   1403   4294963588    C++.key  0
+; 415 275 2308 1516 0 100   4294966936   4294961825    C++.key  0

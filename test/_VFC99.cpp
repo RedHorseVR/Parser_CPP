@@ -1,5 +1,4 @@
 /* includes */
-
 #include <windows.h>
 
 #include "about.h"
@@ -176,7 +175,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	if (file_spec && *file_spec) { //beginif
 		*--file_spec = NULL;
 	} //endif
-
 // MessageBox( NULL , vfc99_directory , " VFC99 ", MB_OK);;
 #ifdef DEMO
 
@@ -193,7 +191,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			ptr = ++d1;
 		} //endif
 		// d1=strstr(lpCmdLine,".ins\t");;
-
 		flags = strrchr(lpCmdLine, '-'
 		if (flags && !strchr(flags, '\\'))//  decide if this is a parma or part of the path by seeing that NO '\' s exist;
 		
@@ -203,10 +200,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	} else {
 			flags = 0;
 		}
-	strtok(ptr, "-"
-	cmdline = lpCmdLine;        //  cmdline=strtok(lpCmdLine,"-");/  ;
-	if (cmdline && *cmdline != '-' && strlen(cmdline)) //beginif
-	{
+		strtok(ptr, "-"
+		cmdline = lpCmdLine;        //  cmdline=strtok(lpCmdLine,"-");/  ;
+		if (cmdline && *cmdline != '-' && strlen(cmdline)) //beginif
+		{
 			char path[300], *dir = strrchr(cmdline, '\\');
 			if (dir) { //beginif
 				*dir = NULL;
@@ -244,7 +241,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				} else {
 				} //endif
 			} //endif
-
 			SetLongFileName(InsectaFilename);
 			HWND H;
 			if ((H = FindWindow(APPNAME, InsectaFilename)) && !strstr(InsectaFilename, "Run")) { //beginif
@@ -282,10 +278,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				return 0;
 			} else {
 			} //endif
-	} else {
-		} //endif
-	InsectaRunMode = Startup.GetStartupCommand(InsectaFilename);
-	if (reg) { //beginif
+		} else {
+			} //endif
+		InsectaRunMode = Startup.GetStartupCommand(InsectaFilename);
+		if (reg) { //beginif
 			char* go = NULL;
 			if (strstr(reg, "WorkSpaceFolder")) { //beginif
 				char temp_buff[556];
@@ -368,7 +364,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				flags = 0;
 				// DEBUG // MessageBox( 0 ,InsectaFilename , " title ", MB_OK);;
 			} //endif
-		} //endif
+			} //endif
 	} else {
 		nCmdShow = SW_SHOW;
 	} //endif
@@ -578,4 +574,4 @@ int APIENTRY __WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmd
 	return msg.wParam;
 }
 
-//  Export  Date: 01:10:00 PM - 10:May:2025;
+//  Export  Date: 01:18:00 PM - 10:May:2025;
