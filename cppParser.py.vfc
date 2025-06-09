@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cppParser.py.vfc
-;  File Date : 09:55:11 PM - 03:Jun:2025
+;  File Date : 02:55:28 PM - 09:Jun:2025
 
 set();//"""
 set( );//Complete Arduino Structure Comment Parser
@@ -575,7 +575,7 @@ set(VFC += f"end(){VFCSEPERATOR}\n");//
 bend();// endif
 branch(if re.match( r'\};' ,  code ):);// 
 path();//
-set(VFC += f"bend(){VFCSEPERATOR}<--- end class\n");// 
+set(VFC += f"bend(){VFCSEPERATOR}\n");// VFC += f"bend(){VFCSEPERATOR}<--- end class\n"
 set(type = 'end');//
 bend();// endif
 branch(if re.match( r'^(public|protected|private):' ,  code ) and type=='set':);// 
@@ -608,7 +608,7 @@ output(VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n');//// //
 bend( );//
 branch(if re.match( CLASS_TYPE ,  code ):);//// if re.match( r'\s*class\b' ,  code ):////
 path();//
-set(VFC += f"branch(){VFCSEPERATOR}<---class\n");// 
+set( VFC += f"branch(){VFCSEPERATOR}\n");//VFC += f"branch(){VFCSEPERATOR}<---class\n"
 set(VFC += f"path(){VFCSEPERATOR} --- \n");// 
 set( );//VFC += f"path(){VFCSEPERATOR} --- \n"
 bend();// endif
@@ -726,4 +726,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cppParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 1873 223 1570 1351 582 128   669   4294964456    python.key  0
+; 1873 223 1570 1351 592 128   978   4294951896    python.key  0

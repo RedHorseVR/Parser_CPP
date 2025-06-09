@@ -1,0 +1,656 @@
+set(/*  Winproc.cpp  */);// 
+event(#include "Winproc.h");// 
+event(#include <commctrl.h>);// 
+event(#include <commdlg.h>);// 
+event(#include <stdio.h>);// 
+event(#include <sys\stat.h>);// 
+event(#include <sys\types.h>);// 
+event(#include <sys\utime.h>);// 
+event(#include <time.h>);// 
+event(#include <windows.h>);// 
+event(#include <windowsx.h>);// 
+event(#include "BookMarkDlg.h");// 
+event(#include "FuncNames.h");// 
+event(#include "ProcessToolbarTips.h");// 
+event(#include "Simulator.h");// 
+event(#include "StdLIB.h");// 
+event(#include "about.h");// 
+event(#include "analysis.h");// 
+event(#include "console.h");// 
+event(#include "editing.h");// 
+event(#include "editvars.h");// 
+event(#include "environ.h");// 
+event(#include "generator.h");// 
+event(#include "getreg.h");// 
+event(#include "globals.h");// 
+event(#include "insecta_objs.h");// 
+event(#include "interpreter.h");// 
+event(#include "obj_parser.h");// 
+event(#include "pathview.h");// 
+event(#include "print.h");// 
+event(#include "project.h");// 
+event(#include "res_extra.h");// 
+event(#include "save.h");// 
+event(#include "undo_redo.h");// 
+event(#include "variables.h");// 
+set(/* defines */);// 
+event(#define SECURITY_CODE "secure_code=MY_DOG_PEES_IN_THE_HOUSE");// 
+event(#define TRACKING 0);// 
+event(#define TRACK);// 
+event(#define VERSION_INFO "3.06 Version ");// 
+event(#define ID_AUTO_PARSE_AND_LOAD_KEYLESS 235);// 
+event(#define ID_GET_FILE_TIMES 234);// 
+event(#define ID_AUTO_PARSE_AND_LOAD 233);// 
+event(#define ID_GETKEYWORDFILTER 232);// 
+event(#define ID_ASKINSECTA 231);// 
+event(#define PAGE_UP 33);// 
+event(#define PAGE_DOWN 34);// 
+event(#define CURSOR_LEFT 37);// 
+event(#define CURSOR_UP 38);// 
+event(#define CURSOR_RIGHT 39);// 
+event(#define CURSOR_DOWN 40);// 
+event(#define DEL_KEY 46);// 
+event(#define HOME_KEY 36);// 
+event(#define END_KEY 35);// 
+event(#define BACK_SPACE 8);// 
+event(#define ESCAPE_KEY 127);// 
+event(#define START_FONT_SIZE 16);// 
+set(/* ToolBar DLL  externals */);// 
+process(void AlignToolBars(););// 
+set(/* externals */);// 
+set(extern HWND h;);// 
+set(extern char GotoMsg[300];);// 
+set(extern class InsectaObject* ObjectList;);// 
+set(extern class Variables* Vlist;);// 
+set(extern class StdLIB InsectaLibrary;);// 
+set(extern class InsectaObject* ProgramCounterObject;);// 
+set(extern int tracers;);// 
+set(extern int new_type;);// 
+set(extern HWND hICodeDlg;);// 
+set(HWND I_code_hwnd;);// 
+set(extern HANDLE comments_pen;);// 
+set(extern HANDLE trace_pen;);// 
+set(extern HANDLE trace_brush;);// 
+set(extern HANDLE undef_pen;);// 
+set(extern HANDLE break_pen;);// 
+set(extern HANDLE break_brush;);// 
+set(extern HANDLE current_pen;);// 
+set(extern HANDLE current_brush;);// 
+set(extern HANDLE error_pen;);// 
+set(extern HANDLE interp_pen;);// 
+set(extern HANDLE diagram_pen;);// 
+set(extern HANDLE thick_diagram_pen;);// 
+set(extern HANDLE background_pen;);// 
+set(extern HANDLE background_brush;);// 
+set(extern HANDLE select_pen;);// 
+set(extern HANDLE select_brush;);// 
+set(extern HANDLE TbarID;);// 
+set(extern HANDLE VbarID;);// 
+set(extern HANDLE DbarID;);// 
+set(extern int DIAGRAM_THICKNESS;);// 
+set(extern int BuffUndoPtr;);// 
+set(/* globals */);// 
+set(int FileAutoParsed = 0;);// 
+set(int MAX_DEMO_OBJECTS = -1;);// 
+set(int showtools = TRUE;);// 
+set(extern int ClearRegFlag;);// 
+set(class ProjectClass Project;);// 
+set(class WindowProcess WinprocObject;);// 
+set(class FunctionNames FuncNames;);// 
+set(COLORREF colors[16];);// 
+set(class InsectaObject* CurrentObject;);// 
+set(HFONT winfont = NULL;);// 
+set(int nobjs = 0;);// 
+set(int fontwidth = START_FONT_SIZE;);// 
+set(char InsectaFilename[255] = "";);// 
+set(int sounds = FALSE;);// 
+set(int TraceMode = FALSE;);// 
+set(HWND IMC232Window = NULL;);// 
+set(int show_comments = FALSE;);// 
+set(int export_indented = TRUE;);// 
+set(int ExportAuto = FALSE;);// 
+set(int Backup = TRUE;);// 
+set(char ExportFileName[257] = "";);// 
+set(char PostExportCommand[512] = "";);// 
+set(int FileSaved = TRUE;);// 
+set(HWND TreeView = NULL;);// 
+set(int createtree = TRUE;);// 
+set(int RunHidden = FALSE;);// 
+set(HWND hObjPropDlg = NULL;);// 
+set(HWND hStatusBar;);// 
+set(BOOL AreaSelectFlag = FALSE;);// 
+set(RECT SelectRect;);// 
+set(int SelectAnchorX = 0;);// 
+set(int SelectAnchorY = 0;);// 
+set(int xPos;);// 
+set(int yPos;);// 
+set(char tmp_buff[600];);// 
+set(char old_name[256] = "";);// 
+set(HDC hDC;);// 
+set(PAINTSTRUCT ps;);// 
+set(int LastX = 0, LastY = 0;);// 
+set(int tracktimes = 0;);// 
+set(int TbarPosX = 0, TbarPosY = 0;);// 
+set(int mouse_button_down = FALSE;);// 
+set(extern int ExportTime;);// 
+set(double scale_factor = 1.0;);// 
+set(class RegisterInsecta RegObject;);// 
+set(/* defines for VFC shared mem modules */);// 
+event(#define VFC_SHARED_MEMORY_DATA "{06B0F857-50F0-11d2-9213-00207814C083}");// 
+input(int ReadSharedMemory(char* str) {);// 
+set(int rtn = 0;);// 
+set(HANDLE hFile = OpenFileMapping(FILE_MAP_READ, 0, VFC_SHARED_MEMORY_DATA););// 
+set(char* mfile = (char*)MapViewOfFile(hFile, FILE_MAP_READ, 0, 0, 0););// 
+branch(if (mfile) {);// 
+path();//
+set(strcpy(str, mfile););// 
+set(rtn = 1;);// 
+path(} else {);// 
+set(rtn = 0;);// 
+bend(});// 
+set(CloseHandle(hFile););// 
+end(return rtn;);// 
+end(});// 
+input(int WriteSharedMemory(LPSTR string) {);// 
+set(int rtn = 0;);// 
+set(HANDLE hFile = CreateFileMapping((HANDLE)0xFFFFFFFF, NULL, PAGE_READWRITE, 0, 355, VFC_SHARED_MEMORY_DATA););// 
+set(char* mfile = (char*)MapViewOfFile(hFile, FILE_MAP_WRITE, 0, 0, 0););// 
+branch(if (mfile) {);// 
+path();//
+set(strncpy(mfile, string, 354););// 
+set(rtn = 1;);// 
+path(} else {);// 
+set(rtn = 0;);// 
+bend(});// 
+end(return rtn;);// 
+end(});// 
+input(int GetTimeDifference(char* InsectaFileName, char* ExportFileName) {);// 
+set(double realtime;);// 
+set(int Dtime = -1, r1, r2;);// 
+set(struct _stat InsFile, ExpFile;);// 
+set(r1 = _stat(InsectaFileName, &InsFile););// 
+set(r2 = _stat(ExportFileName, &ExpFile););// 
+branch(if (r1 != 0 || r2 != 0) {);// 
+path();//
+end(return 0;);// 
+bend(});// 
+set(realtime = difftime(InsFile.st_mtime, ExpFile.st_mtime););// 
+branch(if (realtime >= 0) {);// 
+path();//
+end(return 0;);// 
+path(} else {);// 
+end(return -1;);// 
+bend(});// 
+set(Dtime = (int)(10 * realtime););// 
+end(return Dtime;);// 
+end(});// 
+input(void LoadWindowsWordAnswer(HWND hWnd, char* str) {);// 
+set(int index = 0;);// 
+loop(while (index < 30) {);// 
+set(SetWindowWord(hWnd, index, (WORD)*str););// 
+set(index++;);// 
+set(str++;);// 
+lend(});// 
+end(});// 
+event(#define DX 10);// 
+event(#define DY 10);// 
+input(void JoyMoveFlowCode(DWORD lParam) {);// 
+set(WORD x, y;);// 
+set(POINT pt = {0, 0};);// 
+set(x = LOWORD(lParam) >> 11;);// 
+set(y = HIWORD(lParam) >> 11;);// 
+branch(if (x <= 12));// 
+path();//
+set(pt.x = -DX;);// 
+input(else if (x >= 20));// 
+set(pt.x = DX;);// 
+branch(if (y <= 12));// 
+path();//
+set(pt.y = -DY;);// 
+input(else if (y >= 20));// 
+set(pt.y = DY;);// 
+branch(if (ObjectList) {);// 
+path();//
+set(ObjectList->shift((x - 15) * DX, (y - 15) * DY););// 
+bend(});// 
+set(InvalidateRect(MainWindow, NULL, TRUE););// 
+end(});// 
+set(/* defines for VFC shared mem modules */);// 
+event(#define VFC_SHARED_MEMORY_DATA "{06B0F857-50F0-11d2-9213-00207814C083}");// 
+event(#define VFCREMOTECALL 11223334);// 
+event(#define NAME_OF_VS_COM_TOOL "VFC Add-in Command Tool");// 
+set(RECT LastWindowR;);// 
+set(LRESULT CALLBACK _WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam) {);// 
+set(static int draw_tools = TRUE;);// 
+set(MainWindow = hWnd;);// 
+branch(if (AreaSelectFlag) {);// 
+path();//
+set(SetCursor(LoadCursor(NULL, IDC_CROSS)););// 
+bend(});// 
+set(WinprocObject.CatchSimEvents(hWnd, uMessage, wParam, lParam););// 
+branch(switch (uMessage) {);// 
+path();//
+path(case WM_MOVE:);// 
+set({);// 
+set(RECT r, tr;);// 
+branch(if (EditObject.hObjectBrowser) {);// 
+path();//
+set(GetWindowRect(EditObject.hObjectBrowser, &tr););// 
+set(GetWindowRect(hWnd, &r););// 
+set(SetWindowPos(EditObject.hObjectBrowser, HWND_NOTOPMOST, r.left - LastWindowR.left + tr.left, r.top - LastWindowR.top + tr.top, 10, 10, SWP_NOSIZE | SWP_NOACTIVATE););// 
+bend(});// 
+branch(if (hToolBar) {);// 
+path();//
+set(GetWindowRect(hToolBar, &tr););// 
+set(GetWindowRect(hWnd, &r););// 
+set(SetWindowPos(hToolBar, HWND_NOTOPMOST, r.left - LastWindowR.left + tr.left, r.top - LastWindowR.top + tr.top, 10, 10, SWP_NOSIZE | SWP_NOACTIVATE););// 
+bend(});// 
+branch(if (hObjPropDlg) {);// 
+path();//
+set(GetWindowRect(hObjPropDlg, &tr););// 
+set(GetWindowRect(hWnd, &r););// 
+set(SetWindowPos(hObjPropDlg, HWND_NOTOPMOST, r.left - LastWindowR.left + tr.left, r.top - LastWindowR.top + tr.top, 10, 10, SWP_NOSIZE | SWP_NOACTIVATE););// 
+bend(});// 
+set(BookMarks[0].FollowMainWindow(LastWindowR););// 
+set(GetWindowRect(hWnd, &LastWindowR););// 
+end(return 0;);// 
+end(});// 
+path(case WM_COMMAND:);// 
+set({);// 
+set(int keyless = 0;);// 
+branch(switch (wParam) {);// 
+path();//
+path(case ID_AUTO_PARSE_AND_LOAD_KEYLESS:);// 
+set(TRACK keyless = TRUE;);// 
+path(case ID_AUTO_PARSE_AND_LOAD:);// 
+set({);// 
+set(TRACK char buff[512];);// 
+set(char parser[100] = "";);// 
+set(_utime(InsectaFilename, NULL););// 
+branch(if (lParam) {);// 
+path();//
+set(GetWindowText((HWND)lParam, parser, 100););// 
+set(char* s = strrchr(parser, '-'););// 
+branch(if (s) {);// 
+path();//
+set(*s = 0;);// 
+bend(});// 
+bend(});// 
+input(TRACK if (!*parser) { TRACK MessageBox(hWnd, "Parser Not Loaded. ", "VFC", MB_OK); });// 
+path(else {);// 
+branch(if (keyless) {);// 
+path();//
+process(TRACK wsprintf(buff, "%s\\parse.exe %s %s %d  %d  %s %s", Project.Env->GeneratorDir, ExportFileName, parser, (LPARAM)lParam, hWnd, "Keyless", SECURITY_CODE););// 
+path(} else {);// 
+process(TRACK wsprintf(buff, "%s\\parse.exe %s %s %d  %d  UseKeys   %s", Project.Env->GeneratorDir, ExportFileName, parser, (LPARAM)lParam, hWnd, SECURITY_CODE););// 
+bend(});// 
+set(FileAutoParsed = TRUE;);// 
+set(WinExec(buff, SW_HIDE););// 
+end(});// 
+end(break;);// 
+end(});// 
+path(case ID_GETKEYWORDFILTER:);// 
+set({);// 
+set(char str[100];);// 
+set(int FileDeltaT = GetTimeDifference(InsectaFilename, ExportFileName););// 
+set(wsprintf(str, "%s:%d", FuncNames.KeyWordFilter, FileDeltaT););// 
+set(str[30] = 0;);// 
+set(LoadWindowsWordAnswer(hWnd, str););// 
+end(break;);// 
+end(});// 
+path(case ID_ASKINSECTA:);// 
+set({);// 
+set(LoadWindowsWordAnswer(hWnd, VERSION_INFO););// 
+end(break;);// 
+end(});// 
+path(case ID_GETEXPORTFILE:);// 
+set({);// 
+set(LoadWindowsWordAnswer(hWnd, ExportFileName););// 
+end(break;);// 
+end(});// 
+path(case ID_GETCURRENTDIR:);// 
+set({);// 
+set(LoadWindowsWordAnswer(hWnd, Project.Env->CurrentDir););// 
+set(WriteSharedMemory(Project.Env->CurrentDir););// 
+end(break;);// 
+end(});// 
+path(case ONTOP:);// 
+set(SetWindowPos((HWND)lParam, HWND_TOPMOST, 0, 0, 100, 100, SWP_NOMOVE | SWP_NOSIZE););// 
+end(break;);// 
+path(case IDC_RELOADKEYS:);// 
+set(FuncNames.Reload(hWnd););// 
+end(break;);// 
+path(case IDC_EDITKEYFILE:);// 
+set({);// 
+set(class Environment Env(NULL););// 
+set(char buff[556];);// 
+set(wsprintf(buff, "NotePad.exe \"%s\\%s\"", Env.LibraryDir, FuncNames.KeyWordFilter););// 
+set(WinExec(buff, SW_NORMAL););// 
+end(break;);// 
+end(});// 
+end(break;);// 
+path(case UPDATE:);// 
+set(WinprocObject.UpdateStatusBar(););// 
+end(break;);// 
+path(case UPDATE_KEYNAME:);// 
+set(/*);// 
+branch(if( wParam  ));// 
+path({);//
+set(HANDLE  hFile = OpenFileMapping( FILE_MAP_READ , 0 , VFC_SHARED_MEMORY_DATA ););// 
+set(char *mfile  = (char*) MapViewOfFile( hFile , FILE_MAP_READ , 0 ,  0 , 0 ););// 
+set(strcpy( FuncNames.KeyWordFilter, mfile  ););// 
+set(FuncNames.Reload( hWnd ););// 
+set(CloseHandle( hFile ););// 
+set(WinprocObject.UpdateStatusBar(););// 
+bend(});// 
+set(*/);// 
+end(break;);// 
+path(case GOTO_LINE:);// 
+branch(if (IsIconic(MainWindow)) {);// 
+path();//
+set(ShowWindow(MainWindow, SW_RESTORE););// 
+bend(});// 
+set(ShowWindow(MainWindow, SW_SHOW););// 
+set({);// 
+bend(});// 
+set(SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE););// 
+set(EditObject.ShowStatement((int)lParam););// 
+set(SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE););// 
+branch(if (*GotoMsg) {);// 
+path();//
+set(WinprocObject.StatusBarMessage(2, GotoMsg););// 
+set(*GotoMsg = NULL;);// 
+set(UpdateWindow(hStatusBar););// 
+bend(});// 
+end(break;);// 
+path(default:);// 
+branch(switch (HIWORD(wParam)) {);// 
+path();//
+path(case LBN_DBLCLK:);// 
+set(PostMessage(EditObject.hObjectBrowser, WM_COMMAND, IDC_OBJ_VIEWER_JUMP, 0););// 
+end(break;);// 
+path(default:);// 
+set(int rtnvalue = WinprocObject.ProcessCommand(hWnd, uMessage, wParam, lParam););// 
+branch(if (rtnvalue) {);// 
+path();//
+end(return rtnvalue;);// 
+bend(});// 
+bend(});// 
+end(break;);// 
+bend(});// 
+end(});// 
+end(break;);// 
+path(case WM_CLOSE:);// 
+branch(if (!FileSaved || FileAutoParsed) {);// 
+path();//
+set(int choice = MessageBox(hWnd, "Would you like to save the current diagram?", "VFC", MB_YESNOCANCEL););// 
+branch(switch (choice) {);// 
+path();//
+path(case IDYES:);// 
+set(SendMessage(hWnd, WM_COMMAND, ID_FILE_SAVE, NULL););// 
+end(break;);// 
+path(case IDCANCEL:);// 
+end(return 0;);// 
+bend(});// 
+bend(});// 
+set(DestroyWindow(hWnd););// 
+end(return 0;);// 
+path(case WM_CREATE:);// 
+set(WinprocObject.Create(hWnd, uMessage, wParam, lParam););// 
+set(GetWindowRect(hWnd, &LastWindowR););// 
+set(FuncNames.Reload(MainWindow););// 
+branch(if (!FuncNames.num_tools) {);// 
+path();//
+set(EnableMenuItem(GetMenu(MainWindow), ID_TOOLS_CUSTOMIZE, MF_GRAYED););// 
+end(break;);// 
+path(} else {);// 
+set(EnableMenuItem(GetMenu(MainWindow), ID_TOOLS_CUSTOMIZE, MF_ENABLED););// 
+bend(});// 
+branch(if (strcmp(InsectaFilename, UNTITLED) == 0) {);// 
+path();//
+set(CreateDialog(0, "STARTUPBANNER", MainWindow, (DLGPROC)_StartBanner););// 
+bend(});// 
+set(AlignToolBars(););// 
+end(break;);// 
+path(case WM_KEYDOWN:);// 
+set(WinprocObject.KeyDown(hWnd, uMessage, wParam, lParam););// 
+end(break;);// 
+path(case WM_DROPFILES:);// 
+set(WinprocObject.DragDrop(hWnd, uMessage, wParam, lParam););// 
+end(break;);// 
+path(case WM_NOTIFY:);// 
+set(ToolBars.ProcessCustomToolTips(lParam););// 
+set(ProcessToolTips(lParam););// 
+set(ProcessDebugToolTips(lParam););// 
+set(ProcessViewToolTips(lParam););// 
+set(EditVarsObject.ProcessMessage((NMHDR*)lParam););// 
+end(break;);// 
+path(case WM_SIZE:);// 
+set({);// 
+set(static int MIN_FLAG = 0;);// 
+branch(switch (wParam) {);// 
+path();//
+path(case SIZE_RESTORED:);// 
+branch(if (h) {);// 
+path();//
+set(ShowWindow(h, SW_SHOW););// 
+branch(if (IsIconic(h) && MIN_FLAG) {);// 
+path();//
+set(MIN_FLAG = 0;);// 
+set(ShowWindow(h, SW_RESTORE););// 
+bend(});// 
+bend(});// 
+end(break;);// 
+path(case SIZE_MINIMIZED:);// 
+set(MIN_FLAG = 1;);// 
+branch(if (h) {);// 
+path();//
+set(ShowWindow(h, SW_MINIMIZE););// 
+set(ShowWindow(h, SW_HIDE););// 
+bend(});// 
+set(PostMessage(MainWindow, WM_COMMAND, ID_VIEW_TOOLBARS_ALLIGN, 0););// 
+end(break;);// 
+bend(});// 
+set(RECT r, sb;);// 
+set(GetClientRect(MainWindow, &r););// 
+branch(if (hStatusBar) GetClientRect(hStatusBar, &sb););// 
+path();//
+bend();//
+branch(if (hStatusBar) SetWindowPos(hStatusBar, HWND_TOP, 0, r.bottom - sb.bottom, r.left, sb.bottom, SWP_NOZORDER););// 
+path();//
+bend();//
+end(break;);// 
+end(});// 
+path(case WM_KILLFOCUS:);// 
+set({);// 
+set(HWND hwndGetFocus = (HWND)wParam;);// 
+set(joyReleaseCapture(JOYSTICKID1););// 
+end(break;);// 
+end(});// 
+path(case WM_SETFOCUS:);// 
+set({);// 
+set(HWND hwndLoseFocus = (HWND)wParam;);// 
+branch(if (hwndLoseFocus) {);// 
+path();//
+set(SendMessage(hwndLoseFocus, WM_COMMAND, WM_KILLFOCUS, 0););// 
+bend(});// 
+set(joySetCapture(hWnd, JOYSTICKID1, 0, FALSE););// 
+end(break;);// 
+end(});// 
+path(case WM_ACTIVATE:);// 
+set({);// 
+set(RECT r, sb;);// 
+set(joySetCapture(hWnd, JOYSTICKID1, 0, FALSE););// 
+set(GetClientRect(MainWindow, &r););// 
+set(GetClientRect(hStatusBar, &sb););// 
+set(SetWindowPos(hStatusBar, HWND_TOP, 0, r.bottom - sb.bottom, r.left, r.bottom - sb.bottom + sb.bottom, SWP_NOZORDER););// 
+branch(if (hStatusBar) WinprocObject.UpdateStatusBar(););// 
+path();//
+bend();//
+end(});// 
+set(InvalidateRect(MainWindow, NULL, FALSE););// 
+set(UpdateWindow(MainWindow););// 
+branch(if (ViewToolBar) {);// 
+path();//
+set(InvalidateRect(ViewToolBar, NULL, FALSE););// 
+set(UpdateWindow(ViewToolBar););// 
+bend(});// 
+branch(if (DebugToolBar) {);// 
+path();//
+set(InvalidateRect(DebugToolBar, NULL, FALSE););// 
+set(UpdateWindow(DebugToolBar););// 
+bend(});// 
+branch(if (hExportToolBar) {);// 
+path();//
+set(InvalidateRect(hExportToolBar, NULL, FALSE););// 
+set(UpdateWindow(hCustomToolBar););// 
+bend(});// 
+branch(if (hCustomToolBar) {);// 
+path();//
+set(InvalidateRect(hCustomToolBar, NULL, FALSE););// 
+set(UpdateWindow(hCustomToolBar););// 
+bend(});// 
+branch(if (hToolBar) {);// 
+path();//
+set(InvalidateRect(hToolBar, NULL, FALSE););// 
+set(UpdateWindow(hToolBar););// 
+bend(});// 
+end(break;);// 
+path(case WM_PAINT:);// 
+set(WinprocObject.Paint(hWnd, uMessage, wParam, lParam););// 
+end(break;);// 
+path(case WM_LBUTTONDBLCLK:);// 
+set(WinprocObject.LeftButtonDblClk(hWnd, uMessage, wParam, lParam););// 
+end(break;);// 
+path(case WM_LBUTTONDOWN:);// 
+set(WinprocObject.LeftMouseButtonDown(hWnd, uMessage, wParam, lParam););// 
+end(break;);// 
+path(case MM_JOY1MOVE:);// 
+branch(if (wParam & (JOY_BUTTON1 | JOY_BUTTON2)) {);// 
+path();//
+set(JoyMoveFlowCode(lParam););// 
+bend(});// 
+branch(if (wParam & (JOY_BUTTON3)) {);// 
+path();//
+set(SendMessage(MainWindow, WM_COMMAND, ID_FONT_SMALLER, 0););// 
+bend(});// 
+branch(if (wParam & (JOY_BUTTON4)) {);// 
+path();//
+set(SendMessage(MainWindow, WM_COMMAND, ID_FONT_LARGER, 0););// 
+bend(});// 
+end(break;);// 
+path(case WM_MOUSEWHEEL:);// 
+set({);// 
+set(int zDelta = GET_WHEEL_DELTA_WPARAM(wParam););// 
+branch(if (zDelta < 0) {);// 
+path();//
+set(SendMessage(MainWindow, WM_COMMAND, ID_FONT_SMALLER, 0););// 
+path(} else {);// 
+branch(if (zDelta > 0) {);// 
+path();//
+set(SendMessage(MainWindow, WM_COMMAND, ID_FONT_LARGER, 0););// 
+bend(});// 
+bend(});// 
+end(return 0;);// 
+end(});// 
+path(case WM_MOUSEMOVE:);// 
+set(WinprocObject.MouseMove(hWnd, uMessage, wParam, lParam););// 
+end(break;);// 
+path(case WM_LBUTTONUP:);// 
+set(WinprocObject.LeftMouseButtonUp(hWnd, uMessage, wParam, lParam););// 
+end(break;);// 
+path(case WM_RBUTTONDOWN:);// 
+set(WinprocObject.RightMouseButtonDown(hWnd, uMessage, wParam, lParam););// 
+end(break;);// 
+path(case WM_TIMER:);// 
+branch(switch (wParam) {);// 
+path();//
+path(case ANIMATE_TIMER:);// 
+set(Break(););// 
+branch(if (!ExecuteStep()) {);// 
+path();//
+set(Stop(););// 
+bend(});// 
+branch(if (RunMode == ANIMATION && !InsectaLibrary.WaitingForEvent()) {);// 
+path();//
+set(Continue(););// 
+bend(});// 
+end(break;);// 
+path(case SIMULATION_SYSTEM_TIMER:);// 
+end(break;);// 
+bend(});// 
+end(break;);// 
+end(break;);// 
+path(case WM_DESTROY:);// 
+branch(if (TreeView) {);// 
+path();//
+set(DestroyWindow(TreeView););// 
+set(TreeView = NULL;);// 
+bend(});// 
+branch(if (Vlist) {);// 
+path();//
+set(delete Vlist;);// 
+set(Vlist = NULL;);// 
+bend(});// 
+branch(if (ObjectList) {);// 
+path();//
+set(delete ObjectList;);// 
+set(ObjectList = NULL;);// 
+bend(});// 
+set(InsectaFilename[0] = NULL;);// 
+branch(if (winfont) {);// 
+path();//
+set(DeleteObject(winfont););// 
+bend(});// 
+set(DeleteObject(trace_pen););// 
+set(DeleteObject(trace_brush););// 
+set(DeleteObject(undef_pen););// 
+set(DeleteObject(break_pen););// 
+set(DeleteObject(break_brush););// 
+set(DeleteObject(current_pen););// 
+set(DeleteObject(current_brush););// 
+set(DeleteObject(error_pen););// 
+set(DeleteObject(interp_pen););// 
+set(DeleteObject(diagram_pen););// 
+set(DeleteObject(thick_diagram_pen););// 
+set(DeleteObject(background_brush););// 
+set(DeleteObject(background_pen););// 
+set(DeleteObject(select_pen););// 
+set(DeleteObject(select_brush););// 
+set(DeleteObject(comments_pen););// 
+set(hICodeDlg = NULL;);// 
+set(I_code_hwnd = NULL;);// 
+branch(if (TbarID) {);// 
+path();//
+set(DeleteObject(TbarID););// 
+bend(});// 
+branch(if (VbarID) {);// 
+path();//
+set(DeleteObject(VbarID););// 
+bend(});// 
+branch(if (DbarID) {);// 
+path();//
+set(DeleteObject(DbarID););// 
+bend(});// 
+set(TbarID = NULL;);// 
+set(VbarID = NULL;);// 
+set(DbarID = NULL;);// 
+set(SaveObject.get_time(tmp_buff););// 
+set(strcat(RegObject.RegSession, " ~ "););// 
+set(strcat(RegObject.RegSession, tmp_buff););// 
+set(RegObject.LogSessionTime(RegObject.RegSession););// 
+set(PostQuitMessage(0););// 
+end(break;);// 
+path(default:);// 
+end(return DefWindowProc(hWnd, uMessage, wParam, lParam););// 
+bend(});// 
+end(return 0;);// 
+bend(});// 
+set();// Export  Date: 12:00:29 AM - 20:Jun:2023;
+
+;INSECTA EMBEDDED SESSION INFORMATION
+; 255 16777215 65280 16777088 16711680 32896 8421504 0 255 255 16777215 4227327 2960640
+; Winproc.cpp // 
+; notepad.exe
+;INSECTA EMBEDDED ALTSESSION INFORMATION
+; 880 168 766 1516 0 110   392   31 C++.key  0
