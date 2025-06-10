@@ -3,7 +3,7 @@ set BAT_FILE_PATH=%~dp0
 
 rem set BAT_FILE_PATH=C:\Users\lopezl10\AppData\Local\RedHorseVR\C2VFC_parser
 
-secho The absolute path of this batch file is: %BAT_FILE_PATH%
+echo The absolute path of this batch file is: %BAT_FILE_PATH%
 
 SET COMMENTPARSERPATH=%BAT_FILE_PATH%
 
@@ -16,12 +16,9 @@ set filepath=%1
 for %%A in ("%filepath%") do set filename=%%~nxA
 echo Filename: %filename%
 
-rem copy %filename% _%filename%
-rem  -o outputs a back up copy of the naem given
-rem _%filename%
 
 echo .
-set filepath=%~dp1
+set filepath="%~dp1"
 echo filepath : %filepath%
 
 echo run ---

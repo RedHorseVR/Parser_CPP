@@ -41,7 +41,7 @@ def create_clang_config():
 	"""Create a temporary clang-format configuration file for Arduino code."""
 	fd, path = tempfile.mkstemp(prefix='.clang-format-', text=True)
 	with os.fdopen(fd, 'w') as f:
-			f.write(config)
+		f.write(config)
 		
 	return path
 	
@@ -55,7 +55,7 @@ def indent_else_blocks(code: str) -> str:
 	for line in lines:
 		stripped = line.lstrip()
 		if stripped.startswith('else') and new_lines:
-					prev = new_lines[-1]
+			prev = new_lines[-1]
 			prev_indent = len(prev) - len(prev.lstrip())
 			new_indent = prev_indent + 4
 			new_lines.append(' ' * new_indent + stripped)
@@ -75,7 +75,7 @@ def format_code(code: str) -> str:
 	Formatted code with else-if indented
 	"""
 	try:
-			
+		
 		
 		
 		script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -111,12 +111,12 @@ def add_structure_comments(code: str) -> str:
 	for i, line in enumerate(lines):
 		stripped = line.strip()
 		if not stripped or stripped.startswith('//'):
-					continue
+			continue
 			
 		indent = len(line) - len(line.lstrip())
 		
 		if re.search(r'^\s*if\s*\(', line):
-					blocks.append(('if', i, None, None))
+			blocks.append(('if', i, None, None))
 		elif re.search(r'^\s*for\s*\(', line):
 			blocks.append(('for', i, None, None))
 		elif re.search(r'^\s*while\s*\(', line):
@@ -134,12 +134,12 @@ def add_structure_comments(code: str) -> str:
 			
 		
 		if '{' in stripped:
-					
+			
 			
 			potential_owners = [(idx, block) for idx, block in enumerate(blocks)
 			if block[2] is None and block[1] <= i and i - block[1] <= 2]
 			if potential_owners:
-							
+				
 				bidx = potential_owners[-1][0]
 				btype, sline, _, eline = blocks[bidx]
 				blocks[bidx] = (btype, sline, i, eline)
@@ -150,10 +150,10 @@ def add_structure_comments(code: str) -> str:
 			
 		
 		if '}' in stripped:
-					if brace_stack:
-							_, _, bidx = brace_stack.pop()
+			if brace_stack:
+				_, _, bidx = brace_stack.pop()
 				if bidx is not None:
-									btype, sline, ob, _ = blocks[bidx]
+					btype, sline, ob, _ = blocks[bidx]
 					blocks[bidx] = (btype, sline, ob, i)
 					
 				
@@ -164,18 +164,18 @@ def add_structure_comments(code: str) -> str:
 	updated = []
 	for btype, sline, ob, eline in blocks:
 		if btype == 'if' and eline is not None:
-					chain_end = eline
+			chain_end = eline
 			j = eline + 1
 			while j < len(lines):
 				st = lines[j].strip()
 				if not st or st.startswith('//'):
-									j += 1
+					j += 1
 					continue
 					
 				if st.startswith('else'):
-									# locate '{'
+					# locate '{'
 					if '{' in st:
-											open_j = j
+						open_j = j
 					else:
 						k = j + 1
 						while k < len(lines) and '{' not in lines[k]:
@@ -187,10 +187,10 @@ def add_structure_comments(code: str) -> str:
 					count = 0
 					for ch in lines[open_j]:
 						if ch == '{':
-													count += 1
+							count += 1
 							
 						if ch == '}':
-													count -= 1
+							count -= 1
 							
 						
 					
@@ -198,10 +198,10 @@ def add_structure_comments(code: str) -> str:
 					while m < len(lines) and count > 0:
 						for ch in lines[m]:
 							if ch == '{':
-															count += 1
+								count += 1
 								
 							if ch == '}':
-															count -= 1
+								count -= 1
 								
 							
 						
@@ -225,13 +225,13 @@ def add_structure_comments(code: str) -> str:
 	
 	for btype, sline, ob, eline in blocks:
 		if btype in STRUCTURE_TAGS and sline is not None and eline is not None:
-					start_tag, end_tag = STRUCTURE_TAGS[btype]
+			start_tag, end_tag = STRUCTURE_TAGS[btype]
 			if sline not in tagged_lines and '//' not in result[sline]:
-							result[sline] = f"{result[sline]} //{start_tag}"
+				result[sline] = f"{result[sline]} //{start_tag}"
 				tagged_lines.add(sline)
 				
 			if eline not in tagged_lines and '//' not in result[eline]:
-							result[eline] = f"{result[eline]} //{end_tag}"
+				result[eline] = f"{result[eline]} //{end_tag}"
 				tagged_lines.add(eline)
 				
 			
@@ -245,11 +245,11 @@ def process_file(input_file: str, output_file: str = None, skip_format: bool = F
 	global code_file
 	code_file = input_file
 	try:
-			code = open(input_file).read()
+		code = open(input_file).read()
 		formatted = code if skip_format else format_code(code)
 		final = add_structure_comments(formatted)
 		if output_file:
-					open(output_file, 'w').write(final)
+			open(output_file, 'w').write(final)
 			print(f"Output written to {output_file}")
 		else:
 			print(final)
@@ -335,10 +335,10 @@ def is_path(line: str) -> bool:
 	"""
 	parts = line.strip().split(None, 1)
 	if not parts:
-			return False
+		return False
 		
 	if parts[0].strip(" :") in paths:
-			return True
+		return True
 		
 	
 def replace_string_literals(input_string):
@@ -348,7 +348,7 @@ def replace_string_literals(input_string):
 def split_on_comment(input_string):
 	match = re.search(r'(?<!")#.*$', temp_str)
 	if match:
-			s1 = input_string.strip()
+		s1 = input_string.strip()
 		s2 = match.strip()
 	else:
 		s1, s2 = input_string.strip(), ""
@@ -361,7 +361,7 @@ def split_string(input_string):
 	parts = temp_str.split( INLINECOMMENT , 1)
 	s1 = input_string.strip()
 	if len(parts) > 1 :
-			s2 = parts[1]
+		s2 = parts[1]
 		s1 = s1.replace( INLINECOMMENT   + s2, "")
 	else:
 		s2 = ""
@@ -371,7 +371,7 @@ def split_string(input_string):
 def get_marker( comment ):
 	parts = comment.strip().split(None, 1)
 	if not parts:
-			return "none"
+		return "none"
 		
 	marker = parts[0]
 	return marker
@@ -398,14 +398,14 @@ def get_VFC_type(code : str, line: str) -> Optional[str]:
 		
 	parts = line.strip().split(None, 1)
 	if not parts:
-			return "set"
+		return "set"
 		
 	marker = parts[0]
 	if marker in Begins:
-			return begin_type[marker]
+		return begin_type[marker]
 		
 	if marker in Ends:
-			return end_type[marker]
+		return end_type[marker]
 		
 	return "set"
 	
@@ -422,7 +422,7 @@ def generate_VFC(input_string):
 	prev_code = ''
 	for string in strings:
 		if not string.strip():
-					continue
+			continue
 			
 		code, comment = split_string(string)
 		code = code.strip()
@@ -431,9 +431,9 @@ def generate_VFC(input_string):
 		#--------------------------------------------------------------------------------------------------------- FIX
 		#--------------------------------------------------------------------------------------------------------- FIX
 		if   ( re.match( r'^if\b', code ) or  re.match( STRUCT_ENUM_TYPE , code ) ) and type != 'branch' :
-					type = "branch"
+			type = "branch"
 			if not re.match( r'^if\b.*;$', code ) :
-							fix_stack.append( 'bend' )
+				fix_stack.append( 'bend' )
 				
 			if DEBUG :  comment = ' + br ' + comment
 		elif   code == '{' and (prev_type == 'path' or 'case' in prev_code )  :
@@ -481,8 +481,8 @@ def generate_VFC(input_string):
 		elif   re.match(function_type, code ) or re.match(method_type, code ) or re.match( r'\w*\s+APIENTRY' ,  code ) or re.match( CLASS_TYPE,  code ):
 			type = 'input'
 			if  not '}' in code  :
-							if  not r';' in code  :
-									fix_stack.append( 'end' )
+				if  not r';' in code  :
+					fix_stack.append( 'end' )
 					if DEBUG : comment= ' + in ' + comment
 				else:
 					type = 'process'
@@ -490,7 +490,7 @@ def generate_VFC(input_string):
 					
 			else:
 				if   re.match( r'.*;$', code ) :
-									type = 'process'
+					type = 'process'
 				else:
 					pass
 					
@@ -513,32 +513,32 @@ def generate_VFC(input_string):
 		#--------------------------------------------------------------------------------------------------- FIX
 		marker = get_marker( comment )
 		if marker == "endclass" :
-					VFC += f"bend(){VFCSEPERATOR}\n"
+			VFC += f"bend(){VFCSEPERATOR}\n"
 			
 		if type == "input" :
-					pass
+			pass
 			
 		if re.match( CLASS_TYPE ,  code ):
-					VFC += f"end(){VFCSEPERATOR}\n"
+			VFC += f"end(){VFCSEPERATOR}\n"
 			
 		if re.match( r'\};' ,  code ):
-					VFC += f"bend(){VFCSEPERATOR}\n"
+			VFC += f"bend(){VFCSEPERATOR}\n"
 			type = 'end'
 			
 		if re.match( r'^(public|protected|private):' ,  code ) and type=='set':
-					type = 'path'
+			type = 'path'
 			
 		if DEBUG :
-					VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n'
+			VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n'
 		else:
 			token_list = [
-							"beginfor", "endfor",
+				"beginfor", "endfor",
 				"beginwhile", "endwhile",
 				"beginswitch", "endswitch",
 				"beginfunc", "endfunc",
 				"beginclass", "endclass",
 				"beginmethod", "endmethod" ,
-							"begininput", "endinput",
+				"begininput", "endinput",
 				"beginif", "endif",
 				"begintry", "endtry",
 				"beginwith", "endwith",
@@ -550,18 +550,18 @@ def generate_VFC(input_string):
 			VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n'
 			
 		if re.match( CLASS_TYPE ,  code ):
-					VFC += f"branch(){VFCSEPERATOR}\n"
+			VFC += f"branch(){VFCSEPERATOR}\n"
 			VFC += f"path(){VFCSEPERATOR} --- \n"
 			
 			
 		if type == "branch":
-					VFC += f"path(){VFCSEPERATOR}\n"
+			VFC += f"path(){VFCSEPERATOR}\n"
 			
 		if type == "branch" and re.match( r'^if\b.*;$', code ) :
-					VFC += f"bend(){VFCSEPERATOR}\n"
+			VFC += f"bend(){VFCSEPERATOR}\n"
 			
 		if marker == "beginclass" :
-					VFC += f"branch(){VFCSEPERATOR}\n"
+			VFC += f"branch(){VFCSEPERATOR}\n"
 			VFC += f"path(){VFCSEPERATOR}\n"
 			VFC += f"path(){VFCSEPERATOR}\n"
 			
@@ -586,16 +586,16 @@ def __fix_VFC_paths( input_string ):
 	for i  in range( len(strings) ) :
 		code = strings[i]
 		if code.startswith( "branch")  :
-					code2 = strings[i+1].strip()
+			code2 = strings[i+1].strip()
 			code3 = strings[i+2].strip()
 			if code2.startswith("path()")   and   code3.startswith("set({)"):
-							VFC +=code + "\n"
+				VFC +=code + "\n"
 				VFC += "path({)" + VFCSEPERATOR  + '\n'
 				skip_next = 3
 				
 			
 		if skip_next > 0:
-					skip_next -= 1
+			skip_next -= 1
 			continue
 			
 		VFC +=code + "\n"
@@ -610,16 +610,16 @@ def fix_VFC_paths( input_string ):
 	for i  in range( len(strings) ) :
 		code = strings[i]
 		if code.startswith( "branch")  :
-					code2 = strings[i+1].strip()
+			code2 = strings[i+1].strip()
 			code3 = strings[i+2].strip()
 			if code2.startswith("path()")   and   code3.startswith("set({)"):
-							VFC +=code + "\n"
+				VFC +=code + "\n"
 				VFC += "path({)" + VFCSEPERATOR  + '\n'
 				skip_next = 3
 				
 			
 		if skip_next > 0:
-					skip_next -= 1
+			skip_next -= 1
 			continue
 			
 		VFC +=code + "\n"
@@ -640,7 +640,7 @@ def main():
 	VFC = fix_VFC_paths( VFC )
 	print( modified_code )
 	with open(args.input_file+'.vfc', 'w') as VFC_output:
-			VFC_output.write(VFC)
+		VFC_output.write(VFC)
 		VFC_output.write( footer( args.input_file ) )
 		
 	
@@ -648,5 +648,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 02:55:28 PM - 09:Jun:2025.
+#  Export  Date: 04:25:55 PM - 09:Jun:2025.
 

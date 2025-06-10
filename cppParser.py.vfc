@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cppParser.py.vfc
-;  File Date : 02:55:28 PM - 09:Jun:2025
+;  File Date : 04:25:55 PM - 09:Jun:2025
 
 set();//"""
 set( );//Complete Arduino Structure Comment Parser
@@ -726,4 +726,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cppParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 1873 223 1570 1351 592 128   978   4294951896    python.key  0
+; 1577 244 940 640 592 100   531   4294967289    python.key  0
