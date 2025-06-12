@@ -21,10 +21,10 @@ echo Filename: %filename%
 rem set filepath=%~dp1
 echo PARSING : %filepath%%filename% 
 
-rem echo cmd /c python %BAT_FILE_PATH%cppParser.py %filepath%%filename% -o %filepath%_%filename%
+rem echo cmd /c python %BAT_FILE_PATH%cppParser.py %1 
 
 
-	cmd /c python %BAT_FILE_PATH%cppParser.py %filepath%%filename%  -o %filepath%_%filename%
+	cmd /c python %BAT_FILE_PATH%cppParser.py %1
 rem echo .
 
 start vfc2000 %1.vfc -Reload

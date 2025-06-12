@@ -28,4 +28,4 @@ for %%F in (%*) do (
 )
 timeout /T 6
 echo Done!
-
+pause
