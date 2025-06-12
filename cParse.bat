@@ -17,17 +17,18 @@ for %%A in ("%filepath%") do set filename=%%~nxA
 echo Filename: %filename%
 
 
-echo .
-set filepath="%~dp1"
-echo filepath : %filepath%
 
-echo run ---
+rem set filepath=%~dp1
+echo PARSING : %filepath%%filename% 
 
-	cmd /c python %COMMENTPARSERPATH%\cParser.py %1 -o %filepath%_%filename%
-echo .
+rem echo cmd /c python %BAT_FILE_PATH%cppParser.py %filepath%%filename% -o %filepath%_%filename%
+
+
+	cmd /c python %BAT_FILE_PATH%cppParser.py %filepath%%filename%  -o %filepath%_%filename%
+rem echo .
 
 start vfc2000 %1.vfc -Reload
 
 
  
-EXIT
+

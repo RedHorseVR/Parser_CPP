@@ -12,6 +12,7 @@ import argparse
 import tempfile
 import re
 from typing import List, Tuple, Optional, Set
+PRINTCODE = False;
 
 STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),
 	"for":     ("beginfor",    "endfor"),
@@ -85,8 +86,8 @@ def format_code(code: str) -> str:
 		stream = os.popen(f'"{clang_format_path}" -style=file:"{clang_yaml_path}" "{code_file}"')
 		
 		formatted = stream.read()
-		print( "--->" + code_file )
-		print( "output: [ " ,  formatted + "]" )
+		
+		
 		return formatted
 	except Exception as e:
 		print(f"Error during formatting: {e}", file=sys.stderr)
@@ -252,7 +253,7 @@ def process_file(input_file: str, output_file: str = None, skip_format: bool = F
 			open(output_file, 'w').write(final)
 			print(f"Output written to {output_file}")
 		else:
-			print(final)
+			pass
 			
 	except Exception as e:
 		print(f"Error: {e}", file=sys.stderr)
@@ -638,7 +639,7 @@ def main():
 	modified_code  = process_file(args.input_file, args.output, args.skip_format)
 	VFC = generate_VFC(modified_code)
 	VFC = fix_VFC_paths( VFC )
-	print( modified_code )
+	
 	with open(args.input_file+'.vfc', 'w') as VFC_output:
 		VFC_output.write(VFC)
 		VFC_output.write( footer( args.input_file ) )
@@ -648,5 +649,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 04:25:55 PM - 09:Jun:2025.
+#  Export  Date: 11:49:10 PM - 11:Jun:2025.
 
