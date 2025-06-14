@@ -1,4 +1,10 @@
 BasedOnStyle: Google
+SortIncludes: Never
+IncludeBlocks: Preserve
+
+ReflowComments: false
+
+
 UseTab: Always
 IndentWidth: 4
 TabWidth: 4

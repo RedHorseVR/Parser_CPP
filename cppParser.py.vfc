@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cppParser.py.vfc
-;  File Date : 11:49:10 PM - 11:Jun:2025
+;  File Date : 06:59:31 PM - 13:Jun:2025
 
 set();//"""
 set( );//Complete Arduino Structure Comment Parser
@@ -18,7 +18,7 @@ event(import argparse);//
 event(import tempfile);// 
 event(import re);// 
 event(from typing import List, Tuple, Optional, Set);// 
-set(PRINTCODE = False;);//PRINTCODE = True; 
+set(PRINTCODE = True; );//PRINTCODE = False;
 end();//
 branch();//
 path(STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),);//// //
@@ -585,7 +585,7 @@ set(type = 'path');//
 bend();// endif
 branch(if DEBUG :);//
 path( );//
-output(VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n');//// //
+output(pass);//VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n'
 path(else: );//
 branch(token_list = [);// 
 path();//
@@ -605,6 +605,11 @@ generic("beginloop" , "endloop");// ////
 bend(] );//// //////
 set(pattern = r'^(' + '|'.join(re.escape(token) for token in token_list) + r')\s*');// ////
 generic(comment = re.sub(pattern, '', comment.strip() ));// ////
+bend( );//
+branch(if  INLINECOMMENT in code  :);//if  INLINECOMMENT in code and comment in code   :
+path();//
+output(VFC += f'{type}({code}){VFCSEPERATOR}\n');//// //
+path(else: );//
 output(VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n');//// //
 bend( );//
 branch(if re.match( CLASS_TYPE ,  code ):);//// if re.match( r'\s*class\b' ,  code ):////
@@ -727,4 +732,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cppParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 2164 314 1072 1431 687 100   532   4294951674    python.key  0
+; 641 564 1486 1475 592 140   813   4294949728    python.key  0

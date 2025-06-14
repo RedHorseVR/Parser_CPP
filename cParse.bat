@@ -7,7 +7,6 @@ echo The absolute path of this batch file is: %BAT_FILE_PATH%
 
 SET COMMENTPARSERPATH=%BAT_FILE_PATH%
 
-
 rem pip install clang-format
 
 echo off
@@ -16,16 +15,9 @@ set filepath=%1
 for %%A in ("%filepath%") do set filename=%%~nxA
 echo Filename: %filename%
 
-
-
-rem set filepath=%~dp1
 echo PARSING : %filepath%%filename% 
 
-rem echo cmd /c python %BAT_FILE_PATH%cppParser.py %1 
-
-
-	cmd /c python %BAT_FILE_PATH%cppParser.py %1
-rem echo .
+cmd /c python %BAT_FILE_PATH%cppParser.py %1
 
 start vfc2000 %1.vfc -Reload
 

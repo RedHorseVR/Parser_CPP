@@ -12,7 +12,7 @@ import argparse
 import tempfile
 import re
 from typing import List, Tuple, Optional, Set
-PRINTCODE = False;
+PRINTCODE = True;
 
 STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),
 	"for":     ("beginfor",    "endfor"),
@@ -530,7 +530,7 @@ def generate_VFC(input_string):
 			type = 'path'
 			
 		if DEBUG :
-			VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n'
+			pass
 		else:
 			token_list = [
 				"beginfor", "endfor",
@@ -548,6 +548,10 @@ def generate_VFC(input_string):
 				]
 			pattern = r'^(' + '|'.join(re.escape(token) for token in token_list) + r')\s*'
 			comment = re.sub(pattern, '', comment.strip() )
+			
+		if  INLINECOMMENT in code  :
+			VFC += f'{type}({code}){VFCSEPERATOR}\n'
+		else:
 			VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n'
 			
 		if re.match( CLASS_TYPE ,  code ):
@@ -649,5 +653,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 11:49:10 PM - 11:Jun:2025.
+#  Export  Date: 06:59:31 PM - 13:Jun:2025.
 
