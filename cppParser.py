@@ -459,6 +459,10 @@ def generate_VFC(input_string):
 		elif   re.match( r'^#if', code ) and type == 'set' :
 			type = 'branch'
 			if DEBUG : comment= ' + #if ' + comment
+		elif   re.match( r'(typedef +)*(enum|struct|union) *{$', code ) and type == 'set' :
+			type = 'branch'
+			if DEBUG : comment= ' + #enum' + comment
+			fix_stack.append( 'bend' )
 		elif   re.match( r'^#end', code ) and type == 'set' :
 			type = 'bend'
 			if DEBUG : comment= ' + #eif ' + comment
@@ -653,5 +657,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 06:59:31 PM - 13:Jun:2025.
+#  Export  Date: 08:13:33 PM - 19:Jun:2025.
 

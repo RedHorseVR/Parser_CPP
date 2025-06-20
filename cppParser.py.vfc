@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cppParser.py.vfc
-;  File Date : 06:59:31 PM - 13:Jun:2025
+;  File Date : 08:13:33 PM - 19:Jun:2025
 
 set();//"""
 set( );//Complete Arduino Structure Comment Parser
@@ -505,6 +505,10 @@ set(if DEBUG : comment= ' + cat ' + comment);//
 path(elif   re.match( r'^#if', code ) and type == 'set' :);//
 set(type = 'branch');// 
 set(if DEBUG : comment= ' + #if ' + comment);//
+path(elif   re.match( r'(typedef +)*(enum|struct|union) *{$', code ) and type == 'set' :);//
+set(type = 'branch');// 
+set(if DEBUG : comment= ' + #enum' + comment);//
+set(fix_stack.append( 'bend' ));// 
 path(elif   re.match( r'^#end', code ) and type == 'set' :);//
 set(type = 'bend');// 
 set(if DEBUG : comment= ' + #eif ' + comment);//
@@ -732,4 +736,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cppParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 641 564 1486 1475 592 140   813   4294949728    python.key  0
+; 4294965397 207 1754 1862 489 270   4294960125   4294937169    python.key  0
