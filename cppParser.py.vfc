@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cppParser.py.vfc
-;  File Date : 08:13:33 PM - 19:Jun:2025
+;  File Date : 05:58:28 PM - 27:Jun:2025
 
 set();//"""
 set( );//Complete Arduino Structure Comment Parser
@@ -458,6 +458,8 @@ output(DEBUG = False);//DEBUG = True
 set(strings = input_string.split("\n"));// 
 set(VFC = '');// 
 set(fix_stack = []);// 
+generic(types="(void|bool|char|wchar_t|char8_t|char16_t|char32_t|short|int|long|longlong|float|double|longdouble)" );// ////
+generic(integers="(unsigned +char|unsigned +short|unsigned +int|unsigned +long|unsigned +long)");// ////
 set(CLASS_TYPE = r'^\s*(?:enum\s+|struct\s+|interface\s+|abstract\s+)?class\s+\w+\b(?!.*;\s*$)');//CLASS_TYPE = r'^\s*(\w\s)*class\b'
 generic(STRUCT_ENUM_TYPE = r'^\s*(typedef\s+)?(struct|enum(?!\s+class))\s+\w+\b(?!.*;\s*$)');// 
 set(function_type = r'(?:void|int|float|double|char|long|short|bool|inline|static|extern|APIENTRY|\w|\*|&)*\s+\w+\s*\(');//
@@ -505,10 +507,19 @@ set(if DEBUG : comment= ' + cat ' + comment);//
 path(elif   re.match( r'^#if', code ) and type == 'set' :);//
 set(type = 'branch');// 
 set(if DEBUG : comment= ' + #if ' + comment);//
-path(elif   re.match( r'(typedef +)*(enum|struct|union) *{$', code ) and type == 'set' :);//
+path(elif   re.match( r'(typedef +)*(enum|struct|union|namespace) *{$', code ) and type == 'set' :);//
 set(type = 'branch');// 
 set(if DEBUG : comment= ' + #enum' + comment);//
 set(fix_stack.append( 'bend' ));// 
+set();//
+set();//
+set();//
+set(''' -------------------------------------------- );//
+set(elif   re.match( r'^(namespace)', code ) and type == 'set' :);//////
+set(type = 'branch');// 
+set(if DEBUG : comment= ' + namespace ' + comment);//
+set(fix_stack.append( 'bend' ));// 
+set(-------------------------------------------- ''' );//
 path(elif   re.match( r'^#end', code ) and type == 'set' :);//
 set(type = 'bend');// 
 set(if DEBUG : comment= ' + #eif ' + comment);//
@@ -529,6 +540,14 @@ path(elif ( re.match( r'^while\b', code ) or re.match( r'^for\b', code ) or re.m
 set(type = "loop");// 
 set(fix_stack.append( 'lend' ));// 
 set(if DEBUG : comment= ' + lo ' + comment);//
+path(elif   re.match(  fr"^\w.+<.*>.*::.+\(.*\)",  code )  :);//
+set(comment= ' + template function ' + comment);//if DEBUG :  comment= ' + template function ' + comment
+output(type = 'input');// 
+set(fix_stack.append( 'end' ));// 
+path(elif   re.match(  r"^(template|typedef)\b" ,  code )  :);//
+set(if DEBUG : comment= ' + template  ' + comment);//comment= ' + template  ' + comment
+output(type = 'event');// 
+set( );//fix_stack.append( 'end' )
 path(elif   re.match(function_type, code ) or re.match(method_type, code ) or re.match( r'\w*\s+APIENTRY' ,  code ) or re.match( CLASS_TYPE,  code ):);//
 set(type = 'input');// 
 branch(if  not '}' in code  :);//
@@ -736,4 +755,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cppParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 4294965397 207 1754 1862 489 270   4294960125   4294937169    python.key  0
+; 4294965145 194 2104 1545 524 148   4294958505   4294950612    python.key  0

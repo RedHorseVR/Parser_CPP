@@ -130,6 +130,9 @@ IndentPPDirectives: BeforeHash
 # IndentRequiresClause: true
 IndentWidth:     3
 IndentWrappedFunctionNames: false
+
+InsertBraces: true
+
 # InsertBraces:    false
 # InsertNewlineAtEOF: false
 InsertTrailingCommas: None

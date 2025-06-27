@@ -415,6 +415,8 @@ def generate_VFC(input_string):
 	strings = input_string.split("\n")
 	VFC = ''
 	fix_stack = []
+	types="(void|bool|char|wchar_t|char8_t|char16_t|char32_t|short|int|long|longlong|float|double|longdouble)"
+	integers="(unsigned +char|unsigned +short|unsigned +int|unsigned +long|unsigned +long)"
 	CLASS_TYPE = r'^\s*(?:enum\s+|struct\s+|interface\s+|abstract\s+)?class\s+\w+\b(?!.*;\s*$)'
 	STRUCT_ENUM_TYPE = r'^\s*(typedef\s+)?(struct|enum(?!\s+class))\s+\w+\b(?!.*;\s*$)'
 	function_type = r'(?:void|int|float|double|char|long|short|bool|inline|static|extern|APIENTRY|\w|\*|&)*\s+\w+\s*\('
@@ -459,10 +461,19 @@ def generate_VFC(input_string):
 		elif   re.match( r'^#if', code ) and type == 'set' :
 			type = 'branch'
 			if DEBUG : comment= ' + #if ' + comment
-		elif   re.match( r'(typedef +)*(enum|struct|union) *{$', code ) and type == 'set' :
+		elif   re.match( r'(typedef +)*(enum|struct|union|namespace) *{$', code ) and type == 'set' :
 			type = 'branch'
 			if DEBUG : comment= ' + #enum' + comment
 			fix_stack.append( 'bend' )
+			
+			
+			
+			''' --------------------------------------------
+			elif   re.match( r'^(namespace)', code ) and type == 'set' :
+			type = 'branch'
+			if DEBUG : comment= ' + namespace ' + comment
+			fix_stack.append( 'bend' )
+			-------------------------------------------- '''
 		elif   re.match( r'^#end', code ) and type == 'set' :
 			type = 'bend'
 			if DEBUG : comment= ' + #eif ' + comment
@@ -483,6 +494,14 @@ def generate_VFC(input_string):
 			type = "loop"
 			fix_stack.append( 'lend' )
 			if DEBUG : comment= ' + lo ' + comment
+		elif   re.match(  fr"^\w.+<.*>.*::.+\(.*\)",  code )  :
+			comment= ' + template function ' + comment
+			type = 'input'
+			fix_stack.append( 'end' )
+		elif   re.match(  r"^(template|typedef)\b" ,  code )  :
+			if DEBUG : comment= ' + template  ' + comment
+			type = 'event'
+			
 		elif   re.match(function_type, code ) or re.match(method_type, code ) or re.match( r'\w*\s+APIENTRY' ,  code ) or re.match( CLASS_TYPE,  code ):
 			type = 'input'
 			if  not '}' in code  :
@@ -657,5 +676,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 08:13:33 PM - 19:Jun:2025.
+#  Export  Date: 05:58:28 PM - 27:Jun:2025.
 
