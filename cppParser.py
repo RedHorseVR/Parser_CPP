@@ -328,6 +328,7 @@ events = [
 outputs = [
 	"Serial",
 	"write",
+	"cout",
 	]
 	
 
@@ -420,6 +421,7 @@ def generate_VFC(input_string):
 	CLASS_TYPE = r'^\s*(?:enum\s+|struct\s+|interface\s+|abstract\s+)?class\s+\w+\b(?!.*;\s*$)'
 	STRUCT_ENUM_TYPE = r'^\s*(typedef\s+)?(struct|enum(?!\s+class))\s+\w+\b(?!.*;\s*$)'
 	function_type = r'(?:void|int|float|double|char|long|short|bool|inline|static|extern|APIENTRY|\w|\*|&)*\s+\w+\s*\('
+	OUTPUT_types = [ "cout" , "read" , "write", "print", "send" ]
 	method_type = r'\b[\w\s&\*]+::'
 	prev_type = 'set'
 	prev_code = ''
@@ -538,6 +540,9 @@ def generate_VFC(input_string):
 		marker = get_marker( comment )
 		if marker == "endclass" :
 			VFC += f"bend(){VFCSEPERATOR}\n"
+			
+		if any(word in code for word in OUTPUT_types):
+			type = 'output'
 			
 		if type == "input" :
 			pass
@@ -676,5 +681,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 10:39:09 AM - 28:Jun:2025.
+#  Export  Date: 11:43:22 AM - 30:Jun:2025.
 

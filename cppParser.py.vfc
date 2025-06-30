@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cppParser.py.vfc
-;  File Date : 10:39:09 AM - 28:Jun:2025
+;  File Date : 11:43:22 AM - 30:Jun:2025
 
 set();//"""
 set( );//Complete Arduino Structure Comment Parser
@@ -355,6 +355,7 @@ set(]);//
 path(outputs = [);//// //
 set("Serial",);// 
 set("write",);// 
+set("cout",);// 
 set(]);// 
 bend();//
 end();//
@@ -463,6 +464,7 @@ generic(integers="(unsigned +char|unsigned +short|unsigned +int|unsigned +long|u
 set(CLASS_TYPE = r'^\s*(?:enum\s+|struct\s+|interface\s+|abstract\s+)?class\s+\w+\b(?!.*;\s*$)');//CLASS_TYPE = r'^\s*(\w\s)*class\b'
 generic(STRUCT_ENUM_TYPE = r'^\s*(typedef\s+)?(struct|enum(?!\s+class))\s+\w+\b(?!.*;\s*$)');// 
 set(function_type = r'(?:void|int|float|double|char|long|short|bool|inline|static|extern|APIENTRY|\w|\*|&)*\s+\w+\s*\(');//
+set(OUTPUT_types = [ "cout" , "read" , "write", "print", "send" ]);//
 set(method_type = r'\b[\w\s&\*]+::');//method_type = r'\b[\w\s&\*]+::\w+\s*\([^)]*\)\s*\{'
 set(prev_type = 'set');//
 set(prev_code = '');//
@@ -588,6 +590,10 @@ set(marker = get_marker( comment ));//
 branch(if marker == "endclass" :);// beginif
 path();//
 set(VFC += f"bend(){VFCSEPERATOR}\n");// 
+bend();// endif
+branch(if any(word in code for word in OUTPUT_types):);// 
+path();//
+output( type = 'output');// pass
 bend();// endif
 branch(if type == "input" :);// 
 path();//
@@ -755,4 +761,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cppParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 4294965145 194 2104 1545 524 148   4294963359   4294950790    python.key  0
+; 281 301 2922 1339 575 180   1451   4294946129    python.key  0
