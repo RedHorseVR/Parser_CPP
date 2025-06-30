@@ -468,12 +468,12 @@ def generate_VFC(input_string):
 			
 			
 			
-			''' --------------------------------------------
-			elif   re.match( r'^(namespace)', code ) and type == 'set' :
+			
+		elif   re.match( r'^(namespace)', code ) and type == 'set' :
 			type = 'branch'
 			if DEBUG : comment= ' + namespace ' + comment
 			fix_stack.append( 'bend' )
-			-------------------------------------------- '''
+			
 		elif   re.match( r'^#end', code ) and type == 'set' :
 			type = 'bend'
 			if DEBUG : comment= ' + #eif ' + comment
@@ -676,5 +676,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 05:58:28 PM - 27:Jun:2025.
+#  Export  Date: 10:39:09 AM - 28:Jun:2025.
 

@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cppParser.py.vfc
-;  File Date : 05:58:28 PM - 27:Jun:2025
+;  File Date : 10:39:09 AM - 28:Jun:2025
 
 set();//"""
 set( );//Complete Arduino Structure Comment Parser
@@ -18,7 +18,7 @@ event(import argparse);//
 event(import tempfile);// 
 event(import re);// 
 event(from typing import List, Tuple, Optional, Set);// 
-set(PRINTCODE = True; );//PRINTCODE = False;
+set(PRINTCODE = True;);//PRINTCODE = False;
 end();//
 branch();//
 path(STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),);//// //
@@ -458,7 +458,7 @@ output(DEBUG = False);//DEBUG = True
 set(strings = input_string.split("\n"));// 
 set(VFC = '');// 
 set(fix_stack = []);// 
-generic(types="(void|bool|char|wchar_t|char8_t|char16_t|char32_t|short|int|long|longlong|float|double|longdouble)" );// ////
+generic(types="(void|bool|char|wchar_t|char8_t|char16_t|char32_t|short|int|long|longlong|float|double|longdouble)");// ////
 generic(integers="(unsigned +char|unsigned +short|unsigned +int|unsigned +long|unsigned +long)");// ////
 set(CLASS_TYPE = r'^\s*(?:enum\s+|struct\s+|interface\s+|abstract\s+)?class\s+\w+\b(?!.*;\s*$)');//CLASS_TYPE = r'^\s*(\w\s)*class\b'
 generic(STRUCT_ENUM_TYPE = r'^\s*(typedef\s+)?(struct|enum(?!\s+class))\s+\w+\b(?!.*;\s*$)');// 
@@ -514,12 +514,12 @@ set(fix_stack.append( 'bend' ));//
 set();//
 set();//
 set();//
-set(''' -------------------------------------------- );//
-set(elif   re.match( r'^(namespace)', code ) and type == 'set' :);//////
+set();//''' -------------------------------------------- 
+path(elif   re.match( r'^(namespace)', code ) and type == 'set' :);//////////
 set(type = 'branch');// 
 set(if DEBUG : comment= ' + namespace ' + comment);//
 set(fix_stack.append( 'bend' ));// 
-set(-------------------------------------------- ''' );//
+set();//-------------------------------------------- ''' 
 path(elif   re.match( r'^#end', code ) and type == 'set' :);//
 set(type = 'bend');// 
 set(if DEBUG : comment= ' + #eif ' + comment);//
@@ -609,14 +609,14 @@ bend();// endif
 branch(if DEBUG :);//
 path( );//
 output(pass);//VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n'
-path(else: );//
+path(else:);//
 branch(token_list = [);// 
 path();//
-generic("beginfor", "endfor", );// ////
-generic("beginwhile", "endwhile", );// ////
-generic("beginswitch", "endswitch", );// ////
-generic("beginfunc", "endfunc", );// ////
-generic("beginclass", "endclass", );// ////
+generic("beginfor", "endfor",);// ////
+generic("beginwhile", "endwhile",);// ////
+generic("beginswitch", "endswitch",);// ////
+generic("beginfunc", "endfunc",);// ////
+generic("beginclass", "endclass",);// ////
 generic("beginmethod", "endmethod" ,);// ////
 path();//
 generic("begininput", "endinput",);// ////
@@ -625,14 +625,14 @@ generic("begintry", "endtry",);// ////
 generic("beginwith", "endwith",);// ////
 generic("beginbranch", "endbranch",);// ////
 generic("beginloop" , "endloop");// ////
-bend(] );//// //////
+bend(]);//// //////
 set(pattern = r'^(' + '|'.join(re.escape(token) for token in token_list) + r')\s*');// ////
 generic(comment = re.sub(pattern, '', comment.strip() ));// ////
 bend( );//
 branch(if  INLINECOMMENT in code  :);//if  INLINECOMMENT in code and comment in code   :
 path();//
 output(VFC += f'{type}({code}){VFCSEPERATOR}\n');//// //
-path(else: );//
+path(else:);//
 output(VFC += f'{type}({code}){VFCSEPERATOR} {comment}\n');//// //
 bend( );//
 branch(if re.match( CLASS_TYPE ,  code ):);//// if re.match( r'\s*class\b' ,  code ):////
@@ -755,4 +755,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cppParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 4294965145 194 2104 1545 524 148   4294958505   4294950612    python.key  0
+; 4294965145 194 2104 1545 524 148   4294963359   4294950790    python.key  0
