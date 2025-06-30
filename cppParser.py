@@ -541,7 +541,7 @@ def generate_VFC(input_string):
 		if marker == "endclass" :
 			VFC += f"bend(){VFCSEPERATOR}\n"
 			
-		if any(word in code for word in OUTPUT_types):
+		if type == 'set' and any(word in code for word in OUTPUT_types):
 			type = 'output'
 			
 		if type == "input" :
@@ -681,5 +681,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 11:43:22 AM - 30:Jun:2025.
+#  Export  Date: 12:41:26 PM - 30:Jun:2025.
 
