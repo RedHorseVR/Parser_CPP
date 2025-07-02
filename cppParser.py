@@ -412,7 +412,7 @@ def get_VFC_type(code : str, line: str) -> Optional[str]:
 	return "set"
 	
 def generate_VFC(input_string):
-	DEBUG = False
+	DEBUG = True
 	strings = input_string.split("\n")
 	VFC = ''
 	fix_stack = []
@@ -421,7 +421,7 @@ def generate_VFC(input_string):
 	CLASS_TYPE = r'^\s*(?:enum\s+|struct\s+|interface\s+|abstract\s+)?class\s+\w+\b(?!.*;\s*$)'
 	STRUCT_ENUM_TYPE = r'^\s*(typedef\s+)?(struct|enum(?!\s+class))\s+\w+\b(?!.*;\s*$)'
 	function_type = r'(?:void|int|float|double|char|long|short|bool|inline|static|extern|APIENTRY|\w|\*|&)*\s+\w+\s*\('
-	OUTPUT_types = [ "cout" , "read" , "write", "print", "send" ]
+	OUTPUT_types = [ "cout" , "read" , "write", "print", "send" , "echo" ]
 	method_type = r'\b[\w\s&\*]+::'
 	prev_type = 'set'
 	prev_code = ''
@@ -441,6 +441,8 @@ def generate_VFC(input_string):
 				fix_stack.append( 'bend' )
 				
 			if DEBUG :  comment = ' + br ' + comment
+		elif type == 'set' and any(word in code for word in OUTPUT_types):
+			type = 'output'
 		elif   code == '{' and (prev_type == 'path' or 'case' in prev_code )  :
 			fix_stack.append( 'end' )
 			if DEBUG : comment= ' + p{ ' + comment
@@ -455,6 +457,9 @@ def generate_VFC(input_string):
 			fix_stack.append( 'bend' )
 			if DEBUG : comment= ' + try ' + comment
 		elif   re.match( r".*\bcase\b" , code )  :
+			type = 'path'
+			if DEBUG : comment= ' + case ' + comment
+		elif   re.match( r".*\belse\b *if\b" , code )  :
 			type = 'path'
 			if DEBUG : comment= ' + case ' + comment
 		elif   re.match( r".*\bcatch\b" , code )  :
@@ -497,7 +502,7 @@ def generate_VFC(input_string):
 			fix_stack.append( 'lend' )
 			if DEBUG : comment= ' + lo ' + comment
 		elif   re.match(  fr"^\w.+<.*>.*::.+\(.*\)",  code )  :
-			comment= ' + template function ' + comment
+			if DEBUG :  comment= ' + template function ' + comment
 			type = 'input'
 			fix_stack.append( 'end' )
 		elif   re.match(  r"^(template|typedef)\b" ,  code )  :
@@ -540,9 +545,6 @@ def generate_VFC(input_string):
 		marker = get_marker( comment )
 		if marker == "endclass" :
 			VFC += f"bend(){VFCSEPERATOR}\n"
-			
-		if type == 'set' and any(word in code for word in OUTPUT_types):
-			type = 'output'
 			
 		if type == "input" :
 			pass
@@ -681,5 +683,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 12:41:26 PM - 30:Jun:2025.
+#  Export  Date: 01:21:09 PM - 30:Jun:2025.
 

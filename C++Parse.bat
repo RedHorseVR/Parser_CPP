@@ -23,9 +23,9 @@ for %%F in (%*) do (
 
 	python %~dp0cppParser.py "!file!"
 
-	start VFC2000 !file!.vfc -Reload
+	start VFC2000 !file!.vfc -Goto %2
 	
 )
-timeout /T 6
+rem timeout /T 6
 echo Done!
 

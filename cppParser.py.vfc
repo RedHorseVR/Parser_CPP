@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cppParser.py.vfc
-;  File Date : 12:41:26 PM - 30:Jun:2025
+;  File Date : 01:21:09 PM - 30:Jun:2025
 
 set();//"""
 set( );//Complete Arduino Structure Comment Parser
@@ -455,7 +455,7 @@ set(return "set");//
 end();// endfunc
 
 input(def generate_VFC(input_string):);// beginfunc
-output(DEBUG = False);//DEBUG = True
+output(DEBUG = True);//DEBUG = False
 set(strings = input_string.split("\n"));// 
 set(VFC = '');// 
 set(fix_stack = []);// 
@@ -464,7 +464,7 @@ generic(integers="(unsigned +char|unsigned +short|unsigned +int|unsigned +long|u
 set(CLASS_TYPE = r'^\s*(?:enum\s+|struct\s+|interface\s+|abstract\s+)?class\s+\w+\b(?!.*;\s*$)');//CLASS_TYPE = r'^\s*(\w\s)*class\b'
 generic(STRUCT_ENUM_TYPE = r'^\s*(typedef\s+)?(struct|enum(?!\s+class))\s+\w+\b(?!.*;\s*$)');// 
 set(function_type = r'(?:void|int|float|double|char|long|short|bool|inline|static|extern|APIENTRY|\w|\*|&)*\s+\w+\s*\(');//
-set(OUTPUT_types = [ "cout" , "read" , "write", "print", "send" ]);//
+set(OUTPUT_types = [ "cout" , "read" , "write", "print", "send" , "echo" ]);//
 set(method_type = r'\b[\w\s&\*]+::');//method_type = r'\b[\w\s&\*]+::\w+\s*\([^)]*\)\s*\{'
 set(prev_type = 'set');//
 set(prev_code = '');//
@@ -487,6 +487,8 @@ path();//
 set(fix_stack.append( 'bend' ));// 
 bend();// endif
 set(if DEBUG :  comment = ' + br ' + comment);//
+path(elif type == 'set' and any(word in code for word in OUTPUT_types):);//// //
+output( type = 'output');// pass
 path(elif   code == '{' and (prev_type == 'path' or 'case' in prev_code )  :);//elif   code == '{'   :
 set(fix_stack.append( 'end' ));// 
 set(if DEBUG : comment= ' + p{ ' + comment);//
@@ -501,6 +503,9 @@ set(type = 'branch');//
 set(fix_stack.append( 'bend' ));// 
 set(if DEBUG : comment= ' + try ' + comment);//
 path(elif   re.match( r".*\bcase\b" , code )  :);//elif   re.match( r'} catch (const exception& e) {', code ) and type == 'set' :
+set(type = 'path');// 
+set(if DEBUG : comment= ' + case ' + comment);//
+path(elif   re.match( r".*\belse\b *if\b" , code )  :);//elif   re.match( r'} catch (const exception& e) {', code ) and type == 'set' :
 set(type = 'path');// 
 set(if DEBUG : comment= ' + case ' + comment);//
 path(elif   re.match( r".*\bcatch\b" , code )  :);//elif   re.match( r'} catch (const exception& e) {', code ) and type == 'set' :
@@ -543,7 +548,7 @@ set(type = "loop");//
 set(fix_stack.append( 'lend' ));// 
 set(if DEBUG : comment= ' + lo ' + comment);//
 path(elif   re.match(  fr"^\w.+<.*>.*::.+\(.*\)",  code )  :);//
-set(comment= ' + template function ' + comment);//if DEBUG :  comment= ' + template function ' + comment
+output(if DEBUG :  comment= ' + template function ' + comment);//comment= ' + template function ' + comment
 output(type = 'input');// 
 set(fix_stack.append( 'end' ));// 
 path(elif   re.match(  r"^(template|typedef)\b" ,  code )  :);//
@@ -557,7 +562,7 @@ path();//
 branch(if  not r';' in code  :);//
 path();//
 set(fix_stack.append( 'end' ));// 
-set(if DEBUG : comment= ' + in ' + comment);//
+output(if DEBUG : comment= ' + in ' + comment);// comment= ' + in ' + comment
 path(else:);//
 set(type = 'process');// 
 set(if DEBUG : comment= ' + pr in ' + comment);//
@@ -590,10 +595,6 @@ set(marker = get_marker( comment ));//
 branch(if marker == "endclass" :);// beginif
 path();//
 set(VFC += f"bend(){VFCSEPERATOR}\n");// 
-bend();// endif
-branch(if type == 'set' and any(word in code for word in OUTPUT_types):);// 
-path();//
-output( type = 'output');// pass
 bend();// endif
 branch(if type == "input" :);// 
 path();//
@@ -761,4 +762,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cppParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 281 301 2922 1339 575 180   1379   4294946125    python.key  0
+; 1072 301 2153 1339 439 119   560   4294954816    python.key  0
