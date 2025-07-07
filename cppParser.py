@@ -412,7 +412,7 @@ def get_VFC_type(code : str, line: str) -> Optional[str]:
 	return "set"
 	
 def generate_VFC(input_string):
-	DEBUG = True
+	DEBUG = False
 	strings = input_string.split("\n")
 	VFC = ''
 	fix_stack = []
@@ -683,5 +683,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 01:21:09 PM - 30:Jun:2025.
+#  Export  Date: 10:56:24 AM - 07:Jul:2025.
 
