@@ -441,8 +441,6 @@ def generate_VFC(input_string):
 				fix_stack.append( 'bend' )
 				
 			if DEBUG :  comment = ' + br ' + comment
-		elif type == 'set' and any(word in code for word in OUTPUT_types):
-			type = 'output'
 		elif   code == '{' and (prev_type == 'path' or 'case' in prev_code )  :
 			fix_stack.append( 'end' )
 			if DEBUG : comment= ' + p{ ' + comment
@@ -527,6 +525,8 @@ def generate_VFC(input_string):
 					
 				if DEBUG : comment= ' + sl in ' + comment
 				
+		elif type == 'set' and any(word in code for word in OUTPUT_types):
+			type = 'output'
 		elif   re.match( r'^}', code ) and type == 'set' :
 			#try-catch-exception
 			try:
@@ -683,5 +683,5 @@ if __name__ == '__main__':
 	main()
 	
 
-#  Export  Date: 10:56:24 AM - 07:Jul:2025.
+#  Export  Date: 02:16:22 PM - 15:Jul:2025.
 
