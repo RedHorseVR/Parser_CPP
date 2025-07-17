@@ -19,6 +19,8 @@ echo PARSING : %filepath%%filename%
 
 cmd /c python %BAT_FILE_PATH%cppParser.py %1
 
+pause
+
 start vfc2000 %1.vfc -Reload
 
 

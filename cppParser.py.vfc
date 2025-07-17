@@ -2,7 +2,11 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cppParser.py.vfc
+<<<<<<< Updated upstream
 ;  File Date : 02:16:22 PM - 15:Jul:2025
+=======
+;  File Date : 11:37:49 PM - 13:Jun:2025
+>>>>>>> Stashed changes
 
 set();//"""
 set( );//Complete Arduino Structure Comment Parser
@@ -17,9 +21,14 @@ event(import os);//
 event(import argparse);// 
 event(import tempfile);// 
 event(import re);// 
+event(import string);// 
 event(from typing import List, Tuple, Optional, Set);// 
+<<<<<<< Updated upstream
 set(PRINTCODE = True;);//PRINTCODE = False;
+=======
+>>>>>>> Stashed changes
 end();//
+set(PRINTCODE = True; );//PRINTCODE = False;
 branch();//
 path(STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),);//// //
 set("for":     ("beginfor",    "endfor"),);// 
@@ -45,6 +54,10 @@ set(SpacesBeforeTrailingComments: 1);//
 set(""");//
 bend();//
 end();//
+
+input(def filter_ascii(text):);// 
+generic();//"""Keep only printable ASCII characters"" 
+end(return ''.join(char for char in text if ord(char) < 128));//
 
 input(def create_clang_config():);// beginfunc
 set("""Create a temporary clang-format configuration file for Arduino code.""");//
@@ -272,6 +285,7 @@ generic(code_file = input_file);// ////
 branch(try:);// begintry
 path();//
 set(code = open(input_file).read());// 
+process(code =  filter_ascii( code ));//
 set(formatted = code if skip_format else format_code(code));// 
 set(final = add_structure_comments(formatted));// 
 branch(if output_file:);// beginif
@@ -762,4 +776,8 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cppParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
+<<<<<<< Updated upstream
 ; 539 273 2153 1339 439 119   4294956887   4294953980    python.key  0
+=======
+; 641 391 2401 1648 45 140   1177   4294965962    python.key  0
+>>>>>>> Stashed changes
