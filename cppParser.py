@@ -4,7 +4,6 @@
 
 
 
-
 import subprocess
 import sys
 import os
@@ -13,7 +12,6 @@ import tempfile
 import re
 import string
 from typing import List, Tuple, Optional, Set
-
 PRINTCODE = True;
 STRUCTURE_TAGS = {"if":    ("beginif",     "endif"),
 	"for":     ("beginfor",    "endfor"),
@@ -746,9 +744,5 @@ if __name__ == '__main__':
 	main()
 	
 
-<<<<<<< Updated upstream
-#  Export  Date: 02:16:22 PM - 15:Jul:2025.
-=======
-#  Export  Date: 11:37:49 PM - 13:Jun:2025.
->>>>>>> Stashed changes
+#  Export  Date: 12:24:30 AM - 17:Jul:2025.
 
