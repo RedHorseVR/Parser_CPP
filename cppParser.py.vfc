@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cppParser.py.vfc
-;  File Date : 02:48:47 PM - 29:Jul:2025
+;  File Date : 02:50:50 PM - 29:Jul:2025
 
 set( );//Complete Arduino Structure Comment Parser
 set( );//A two-phase parser that:
@@ -538,7 +538,7 @@ set(if DEBUG : comment= ' + end ' + comment);//
 path(elif   re.match( r'} while\b', code ) and type == 'set' :);//
 set(type = "lend");// 
 set(if DEBUG : comment= ' + dw ' + comment);//
-path(elif   re.match( r'^default\b', code )  or  re.match( r'^#else', code ) or  re.match( r'^#els', code )   :);//elif   re.match( r'^case\b.*\{$', code )  :
+path(elif   re.match( r'^default\b', code )  or  re.match( r'^#else', code ) or  re.match( r'^#elif', code )   :);//elif   re.match( r'^case\b.*\{$', code )  :
 set(type = "path");// 
 set( );//fix_stack.append( 'end' )
 set(if DEBUG : comment= ' + def ' + comment);//
