@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cppParser.py.vfc
-;  File Date : 02:50:50 PM - 29:Jul:2025
+;  File Date : 12:59:47 PM - 06:Aug:2025
 
 set( );//Complete Arduino Structure Comment Parser
 set( );//A two-phase parser that:
@@ -549,6 +549,14 @@ path(elif ( re.match( r'^while\b', code ) or re.match( r'^for\b', code ) or re.m
 set(type = "loop");// 
 set(fix_stack.append( 'lend' ));// 
 set(if DEBUG : comment= ' + lo ' + comment);//
+path(elif   re.match(  r"^inline\b.+\(.*\) *\{.*\}$",  code )  :);//
+output(if DEBUG :  comment= ' + inline function ' + comment);//comment= ' + template function ' + comment
+output(type = 'input');// 
+set( );//fix_stack.append( 'end' )
+path(elif   re.match(  r"^inline\b.+\(.*\) *\{$",  code )  :);//
+output(if DEBUG :  comment= ' + inline function ' + comment);//comment= ' + template function ' + comment
+output(type = 'input');// 
+set(fix_stack.append( 'end' ));// 
 path(elif   re.match(  fr"^\w.+<.*>.*::.+\(.*\)",  code )  :);//
 output(if DEBUG :  comment= ' + template function ' + comment);//comment= ' + template function ' + comment
 output(type = 'input');// 
@@ -766,4 +774,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cppParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 78 78 940 640 521 119   4294961048   4294953870    python.key  0
+; 4294965436 835 2647 586 521 119   4294960591   4294953644    python.key  0
