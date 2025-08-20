@@ -733,6 +733,9 @@ def generate_VFC(input_string):  # beginfunc
             # endif
         # endfor
 
+    VFC += f"set(){VFCSEPERATOR}\n"
+    VFC += f"set(){VFCSEPERATOR}\n"
+    VFC += f"set(){VFCSEPERATOR}\n"
     return VFC
     # endfunc
 

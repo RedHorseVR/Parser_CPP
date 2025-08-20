@@ -1,9 +1,11 @@
 REM CODE DIFFERENCE CHECK ...
 @echo off
 setlocal enabledelayedexpansion
+echo %1
 
-set /p exten="Enter code file extension: "
-echo EXTEN:%exten%!
+
+rem set /p exten="Enter code file extension: "
+rem echo EXTEN:%exten%!
 
 
 if "%~1"=="" (
@@ -24,13 +26,14 @@ ECHO FILE2: %~2.%exten%
 ECHO ---------------------------------
 
 
-set "clean1=%1.%exten%"
-set "clean2=%2.%exten%"
+set "clean1=%1"
+set "clean2=%2"
 
+set BAT_FILE_PATH=%~dp0
 
 echo FOMRATTING ::::::::::::::::::::::::::::::::::
-clang-format -style=file:"C:\Users\lopezl10\AppData\Local\RedHorseVR\C2VFC_parser\.clang-format" -i "%clean1%"
-clang-format -style=file:"C:\Users\lopezl10\AppData\Local\RedHorseVR\C2VFC_parser\.clang-format" -i "%clean2%"
+clang-format -style=file:"%BAT_FILE_PATH%.clang-format" -i "%clean1%"
+clang-format -style=file:"%BAT_FILE_PATH%.clang-format" -i "%clean2%"
 
 WinMergeU.exe "%clean1%" "%clean2%"
 
