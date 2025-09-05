@@ -1,6 +1,3 @@
-
-© 2025 Luis. All rights reserved.
-
 Dual-License Notice for VFCode and related tools
 -------------------------------------------------
 
@@ -10,7 +7,7 @@ This software is dual-licensed by the author, Luis R. Lopez.
    - Fewer than 4 developers
    - AND less than $5,000,000 USD in annual revenue
 
-   The software is licensed under the GNU General Public License v3.0, with the following conditions:
+2. The software is licensed under the GNU General Public License v3.0, with the following conditions:
    - Retain all copyright notices
    - Share modifications under the same license (GPLv3)
    - Prominently display the reference:
@@ -19,7 +16,7 @@ This software is dual-licensed by the author, Luis R. Lopez.
    
      '*Export Date: 11:13:19 AM - 22:Apr:2025.*' or '*Made with VFCode*'
 
-2. All other use cases require a commercial license. This includes:
+3. All other use cases also require a commercial license. This includes:
    - Organizations with 4 or more developers
    - OR organizations with fewer than 4 developers but more than $5,000,000 USD in annual revenue
 

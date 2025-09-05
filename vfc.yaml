@@ -1,0 +1,26 @@
+BasedOnStyle: Google
+SortIncludes: Never
+IncludeBlocks: Preserve
+
+ReflowComments: false
+
+
+UseTab: Always
+IndentWidth: 4
+TabWidth: 4
+BreakBeforeBraces: Attach
+BraceWrapping:
+  AfterFunction: true
+  AfterControlStatement: false
+  AfterNamespace: false
+  AfterClass: false
+  AfterStruct: false
+  AfterEnum: false
+  BeforeElse: false
+AllowShortBlocksOnASingleLine: Never
+ContinuationIndentWidth: 4
+IndentCaseBlocks: true
+ColumnLimit: 200
+DerivePointerAlignment: false
+AlwaysBreakBeforeMultilineStrings: true
+
