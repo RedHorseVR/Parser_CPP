@@ -2,7 +2,7 @@
 ;  c1995-2015: Visual Flow Coder by 2LResearch
 ;
 ;  File Name : cppParser.py.vfc
-;  File Date : 09:37:11 PM - 19:Aug:2025
+;  File Date : 10:08:36 AM - 20:Aug:2025
 
 set( );//Complete Arduino Structure Comment Parser
 set( );//A two-phase parser that:
@@ -657,7 +657,7 @@ bend( );//
 branch(if re.match( CLASS_TYPE ,  code ):);//// if re.match( r'\s*class\b' ,  code ):////
 path();//
 set( VFC += f"branch(){VFCSEPERATOR}\n");//VFC += f"branch(){VFCSEPERATOR}<---class\n"
-set(VFC += f"path(){VFCSEPERATOR} --- \n");// 
+set(VFC += f"path(){VFCSEPERATOR}\n");// 
 set( );//VFC += f"path(){VFCSEPERATOR} --- \n"
 bend();// endif
 branch(if type == "branch":);// beginif
@@ -777,4 +777,4 @@ set();//   Export  Date: 12:09:11 PM - 23:Apr:2025.
 ;    cppParser.py   #   .
 ; notepad.exe
 ;INSECTA EMBEDDED ALTSESSION INFORMATION
-; 4294965186 374 1940 1336 658 149   975   4294947631    python.key  0
+; 890 405 1940 1336 640 149   1013   4294948025    python.key  0
